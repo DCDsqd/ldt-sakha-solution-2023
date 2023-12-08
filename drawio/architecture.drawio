@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-12-08T16:52:38.729Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="4jVjIkiqkJFi5fS5P-oV" version="22.1.7" type="github">
+<mxfile host="app.diagrams.net" modified="2023-12-08T16:59:28.412Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="0I2to-Hygch0XUb_fk5D" version="22.1.7" type="github">
   <diagram name="Page-1" id="Xc5zzge4J1x3DNNiZxY5">
     <mxGraphModel dx="1434" dy="746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -36,7 +36,7 @@
         <mxCell id="CMU2UXfOHHLqtj2l74aF-9" value="Бэкенд анализа соц. сетей" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="570" y="330.63" width="158.5" height="85" as="geometry" />
         </mxCell>
-        <mxCell id="CMU2UXfOHHLqtj2l74aF-11" value="Сервис парса соц. сетей" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-11" value="Сервис парса соц. сетей&lt;br&gt;(вряд-ли самостоятельный сервис, скорее - просто запускаемый код)" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="255" y="480" width="170" height="100" as="geometry" />
         </mxCell>
         <mxCell id="CMU2UXfOHHLqtj2l74aF-12" value="" style="edgeStyle=orthogonalEdgeStyle;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startArrow=none;endArrow=none;rounded=0;targetPortConstraint=eastwest;sourcePortConstraint=northsouth;curved=0;rounded=0;" parent="1" target="CMU2UXfOHHLqtj2l74aF-14" edge="1">

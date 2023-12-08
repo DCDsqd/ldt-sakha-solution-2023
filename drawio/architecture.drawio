@@ -1,0 +1,67 @@
+<mxfile host="app.diagrams.net" modified="2023-12-08T16:11:01.788Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="178nkOhx9F_0SnCryUi9" version="22.1.7" type="github">
+  <diagram name="Page-1" id="Xc5zzge4J1x3DNNiZxY5">
+    <mxGraphModel dx="1434" dy="746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;verticalAlign=middle;" edge="1" parent="1" source="CMU2UXfOHHLqtj2l74aF-1" target="CMU2UXfOHHLqtj2l74aF-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-1" value="БД&lt;br&gt;1) Данные пользователей&lt;br&gt;2) Кэшированные результаты анализа&lt;br&gt;3) Справочники по группам для соц. сетей&lt;br&gt;..." style="shape=datastore;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="79.38" width="190" height="251.25" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="CMU2UXfOHHLqtj2l74aF-2" target="CMU2UXfOHHLqtj2l74aF-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-2" value="" style="shape=actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="368.5" y="10" width="66" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="CMU2UXfOHHLqtj2l74aF-3" target="CMU2UXfOHHLqtj2l74aF-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="CMU2UXfOHHLqtj2l74aF-3" target="CMU2UXfOHHLqtj2l74aF-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-3" value="Веб сервис (интерфейс + свой бэк)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="160" width="163" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-9" value="Бэкенд анализа соц. сетей" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="330.63" width="158.5" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-11" value="Сервис парса соц. сетей" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="205" y="480" width="170" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-12" value="" style="edgeStyle=orthogonalEdgeStyle;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startArrow=none;endArrow=none;rounded=0;targetPortConstraint=eastwest;sourcePortConstraint=northsouth;curved=0;rounded=0;" edge="1" target="CMU2UXfOHHLqtj2l74aF-14" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="290" y="580" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-13" value="" style="edgeStyle=orthogonalEdgeStyle;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startArrow=none;endArrow=none;rounded=0;targetPortConstraint=eastwest;sourcePortConstraint=northsouth;curved=0;rounded=0;" edge="1" target="CMU2UXfOHHLqtj2l74aF-15" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="290" y="580" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-14" value="Статический парс для справочников&lt;br&gt;(выполняется переодически)" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;treeFolding=1;treeMoving=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="620" width="100" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-15" value="Динамический парс (выполняется каждый раз при анализе юзера)" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;treeFolding=1;treeMoving=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="620" width="100" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1.01;entryY=0.592;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="CMU2UXfOHHLqtj2l74aF-9" target="CMU2UXfOHHLqtj2l74aF-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="649" y="599" />
+              <mxPoint x="510" y="599" />
+              <mxPoint x="510" y="600" />
+              <mxPoint x="440" y="600" />
+              <mxPoint x="440" y="694" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CMU2UXfOHHLqtj2l74aF-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="CMU2UXfOHHLqtj2l74aF-14" target="CMU2UXfOHHLqtj2l74aF-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

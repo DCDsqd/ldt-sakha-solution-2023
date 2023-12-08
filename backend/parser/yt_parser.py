@@ -45,14 +45,17 @@ def get_user_yt_subscriptions():
             subscriptions = get_subscriptions(subscriptions['nextPageToken'])
             all_subscriptions.extend(subscriptions.get('items', []))
 
-        # Вывод названий и ID каналов
-        for item in all_subscriptions:
-            title = item['snippet']['title']
-            channel_id = item['snippet']['resourceId']['channelId']
-            print(f"Title: {title}, Channel ID: {channel_id}")
-
     except Exception as e:
         print(f"An error occurred: {e}")
+        return None
+
+    return all_subscriptions
 
 
-get_user_yt_subscriptions()
+res = get_user_yt_subscriptions()
+
+# Вывод названий и ID каналов
+for item in res:
+    title = item['snippet']['title']
+    channel_id = item['snippet']['resourceId']['channelId']
+    print(f"Title: {title}, Channel ID: {channel_id}")

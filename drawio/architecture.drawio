@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-12-08T16:59:28.412Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="0I2to-Hygch0XUb_fk5D" version="22.1.7" type="github">
+<mxfile host="app.diagrams.net" modified="2023-12-08T16:59:43.192Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="hjRiSSP0125eKm0EHU-6" version="22.1.7" type="github">
   <diagram name="Page-1" id="Xc5zzge4J1x3DNNiZxY5">
     <mxGraphModel dx="1434" dy="746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -30,7 +30,7 @@
         </mxCell>
         <mxCell id="wTm-uzZhs3im5k4A2jm_-9" value="Запись результатов в кэш&lt;br&gt;Проверка кэша" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;" vertex="1" connectable="0" parent="wTm-uzZhs3im5k4A2jm_-6">
           <mxGeometry x="-0.1825" y="-1" relative="1" as="geometry">
-            <mxPoint as="offset" />
+            <mxPoint x="58" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="CMU2UXfOHHLqtj2l74aF-9" value="Бэкенд анализа соц. сетей" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">

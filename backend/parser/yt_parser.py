@@ -2,6 +2,7 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+import json
 
 
 def get_user_yt_subscriptions():
@@ -33,6 +34,7 @@ def get_user_yt_subscriptions():
                 part="snippet",
                 mine=True,
                 maxResults=50,  # Максимальное количество результатов на страницу (максимум 50)
+                order="relevance",
                 pageToken=page_token
             ).execute()
 
@@ -53,6 +55,10 @@ def get_user_yt_subscriptions():
 
 
 res = get_user_yt_subscriptions()
+
+file_path = 'latest_youtube_subscriptions_answer.json'
+with open(file_path, 'w', encoding='utf-8') as file:
+    json.dump(res, file, ensure_ascii=False, indent=4)
 
 # Вывод названий и ID каналов
 for item in res:

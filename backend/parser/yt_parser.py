@@ -5,7 +5,15 @@ import googleapiclient.errors
 import json
 
 
-def get_user_yt_subscriptions():
+# A class to represent a YouTube channel with all the needed data for further processing
+class YTChannel:
+    def __init__(self, yt_channel_id, yt_title, yt_description):
+        self.yt_id = yt_channel_id
+        self.title = yt_title
+        self.desc = yt_description
+
+
+def get_user_yt_subscriptions() -> list[YTChannel]:
     # Disable OAuthlib's HTTPS verification when running locally.
     # DO NOT leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
@@ -49,19 +57,23 @@ def get_user_yt_subscriptions():
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return None
+        return []
 
-    return all_subscriptions
+    file_path = 'latest_youtube_subscriptions_answer.json'
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(all_subscriptions, file, ensure_ascii=False, indent=4)
+
+    sub_list = []
+
+    for item in all_subscriptions:
+        title = item['snippet']['title']
+        channel_id = item['snippet']['resourceId']['channelId']
+        desc = item['snippet']['description']
+        sub_list.append(YTChannel(title, channel_id, desc))
+
+    return sub_list
 
 
 res = get_user_yt_subscriptions()
 
-file_path = 'latest_youtube_subscriptions_answer.json'
-with open(file_path, 'w', encoding='utf-8') as file:
-    json.dump(res, file, ensure_ascii=False, indent=4)
-
-# Вывод названий и ID каналов
-for item in res:
-    title = item['snippet']['title']
-    channel_id = item['snippet']['resourceId']['channelId']
-    print(f"Title: {title}, Channel ID: {channel_id}")
+print(res)

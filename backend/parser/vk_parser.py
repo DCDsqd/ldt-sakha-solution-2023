@@ -1,11 +1,16 @@
+import json
 import vk_api
 
-# To use VK API, you first need to register your application on VK and get an access token.
-# Replace 'YOUR_ACCESS_TOKEN' with the access token you received from VK.
-
-vk_session = vk_api.VkApi(token='YOUR_ACCESS_TOKEN')
+# Path to the JSON file containing the VK access token
+config_file_path = 'config.json'
 
 try:
+    # Read the token from the JSON file
+    with open(config_file_path, 'r') as file:
+        config = json.load(file)
+        token = config.get('vk_token')
+
+    vk_session = vk_api.VkApi(token=token)
     vk = vk_session.get_api()
 
     # Replace 'user_id' with the ID of the user whose groups you want to fetch.

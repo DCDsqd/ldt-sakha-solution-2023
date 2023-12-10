@@ -14,7 +14,7 @@ class YTChannel:
 
 
 def get_user_yt_subscriptions() -> list[YTChannel]:
-    # Disable OAuthlib's HTTPS verification when running locally.
+    # Disable/Enable OAuthlib's HTTPS verification when running locally.
     # DO NOT leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 
@@ -24,7 +24,9 @@ def get_user_yt_subscriptions() -> list[YTChannel]:
 
     # Get credentials and create an API client
     flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, scopes=["https://www.googleapis.com/auth/youtube.readonly"])
+        client_secrets_file,
+        scopes=["https://www.googleapis.com/auth/youtube.readonly"]
+    )
     credentials = flow.run_local_server(port=8090)
     youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
 
@@ -75,5 +77,4 @@ def get_user_yt_subscriptions() -> list[YTChannel]:
 
 
 res = get_user_yt_subscriptions()
-
 print(res)

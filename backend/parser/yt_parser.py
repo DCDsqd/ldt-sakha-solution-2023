@@ -62,31 +62,31 @@ class YTChannel:
         upload_playlist_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
         # Fetch the videos from the upload playlist
-        video_data = []
         playlist_request = youtube_api.playlistItems().list(
-            part="snippet,contentDetails",
+            part="contentDetails",
             playlistId=upload_playlist_id,
-            maxResults=20  # Adjust as needed
+            maxResults=50  # Adjust as needed
         )
         playlist_response = playlist_request.execute()
 
-        for item in playlist_response.get('items', []):
-            video_id = item['contentDetails']['videoId']
+        video_ids = [item['contentDetails']['videoId'] for item in playlist_response.get('items', [])]
 
-            # Fetch additional video details for each video ID
-            video_request = youtube_api.videos().list(
-                part="snippet",
-                id=video_id
-            )
-            video_response = video_request.execute()
+        # Batch request for video details
+        video_request = youtube_api.videos().list(
+            part="snippet",
+            id=','.join(video_ids)  # Join video IDs with commas for batch request
+        )
+        video_response = video_request.execute()
 
-            for video in video_response.get('items', []):
-                title = video['snippet']['title']
-                description = video['snippet']['description']
-                category_id = video['snippet']['categoryId']
-                category = category_map.get(category_id, "Unknown")
+        # Process each video
+        video_data = []
+        for video in video_response.get('items', []):
+            title = video['snippet']['title']
+            description = video['snippet']['description']
+            category_id = video['snippet']['categoryId']
+            category = category_map.get(category_id, "Unknown")
 
-                video_data.append({'title': title, 'description': description, 'category': category})
+            video_data.append({'title': title, 'description': description, 'category': category})
 
         return video_data
 

@@ -4,20 +4,21 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import json
 
+from backend.parser.common import remove_urls
 
-def init_and_auth_youtube():
+
+def init_and_auth_youtube(client_secrets_file_path):
     # Disable/Enable OAuthlib's HTTPS verification when running locally.
     # DO NOT leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "../../secrets/google_project_secret.apps.googleusercontent.com.json"
 
     try:
         # Get credentials and create an API client
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-            client_secrets_file,
+            client_secrets_file_path,
             scopes=["https://www.googleapis.com/auth/youtube.readonly"]
         )
         credentials = flow.run_local_server(port=8090)
@@ -40,6 +41,23 @@ def get_yt_category_map(youtube_api, region_code="RU"):
     return category_map
 
 
+# A class to represent a YouTube video
+class YTVideoInfo:
+    def __init__(self, title, desc, category):
+        self.title = title
+        self.desc = desc
+        self.category = category
+
+        self.desc = remove_urls(self.desc)
+
+    def __str__(self):
+        """
+        Returns a string representation of the YouTube channel,
+        including its ID, title, and description.
+        """
+        return f"Video title: {self.title}\nDescription: {self.desc}\nCategory: {self.category}"
+
+
 # A class to represent a YouTube channel with all the needed data for further processing
 class YTChannel:
     def __init__(self, yt_channel_id, yt_title, yt_description):
@@ -47,8 +65,15 @@ class YTChannel:
         self.title = yt_title
         self.desc = yt_description
 
-    def analyze_videos(self, youtube_api):
-        print(f"Analyzing videos for channel ID: {self.yt_id}")
+    def __str__(self):
+        """
+        Returns a string representation of the YouTube channel,
+        including its ID, title, and description.
+        """
+        return f"Channel ID: {self.yt_id}\nTitle: {self.title}\nDescription: {self.desc}"
+
+    def analyze_videos(self, youtube_api) -> list[YTVideoInfo]:
+        # print(f"Analyzing videos for channel ID: {self.yt_id}")
 
         category_map = get_yt_category_map(youtube_api)
 
@@ -86,7 +111,7 @@ class YTChannel:
             category_id = video['snippet']['categoryId']
             category = category_map.get(category_id, "Unknown")
 
-            video_data.append({'title': title, 'description': description, 'category': category})
+            video_data.append(YTVideoInfo(title, description, category))
 
         return video_data
 
@@ -125,8 +150,8 @@ def get_user_yt_subscriptions(youtube) -> list[YTChannel]:
     return sub_list
 
 
-yt = init_and_auth_youtube()
-res = get_user_yt_subscriptions(yt)
+# yt = init_and_auth_youtube("../../secrets/google_project_secret.apps.googleusercontent.com.json")
+# res = get_user_yt_subscriptions(yt)
 # print(res)
 
-print(res[0].analyze_videos(yt))
+# print(res[2].analyze_videos(yt)[0])

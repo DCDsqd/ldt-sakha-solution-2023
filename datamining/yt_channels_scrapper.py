@@ -7,37 +7,48 @@ import sqlite3
 # @max_videos is API-usage optimal only if max_videos % 50 == 0
 def get_popular_videos_with_query(youtube, query, max_videos=300):
     try:
-        relevant_videos = {}
+        relevant_videos = {}  # Словарь для хранения информации о видео, ключ - video_id
         next_page_token = None
 
         while sum(len(videos) for videos in relevant_videos.values()) < max_videos:
             try:
-                video_response = youtube.search().list(
-                    part='snippet,id',
-                    maxResults=50,  # May optimize this value (add var) since usually we know how much we need to fetch
-                    type='video',
-                    regionCode='RU',
-                    q=query,
-                    safeSearch='none',
-                    relevanceLanguage='ru',
-                    order='relevance',
-                    pageToken=next_page_token
-                ).execute()
+                if query is not None:
+                    query = query.replace(', ', '|').replace(',', '|')
+                    video_response = youtube.search().list(
+                        part='snippet,id',
+                        maxResults=50,  # May optimize this (add var) since usually we know how much we need to fetch
+                        type='video',
+                        regionCode='RU',
+                        q=query,
+                        safeSearch='none',
+                        relevanceLanguage='ru',
+                        order='relevance',
+                        pageToken=next_page_token
+                    ).execute()
+                else:
+                    video_response = youtube.search().list(
+                        part='snippet,id',
+                        maxResults=50,  # May optimize this (add var) since usually we know how much we need to fetch
+                        type='video',
+                        regionCode='RU',
+                        safeSearch='none',
+                        relevanceLanguage='ru',
+                        order='relevance',
+                        pageToken=next_page_token
+                    ).execute()
 
-                for video in video_response.get('items', []):
-                    channel_id = video['snippet']['channelId']
-                    video_title = video['snippet']['title']
-                    video_description = video['snippet']['description']
-                    video_id = video['id']['videoId']
+                for vid in video_response.get('items', []):
+                    video_id = vid['id']['videoId']  # Идентификатор видео используется в качестве ключа
+                    channel_id = vid['snippet']['channelId']
+                    video_title = vid['snippet']['title']
+                    video_description = vid['snippet']['description']
 
-                    if channel_id not in relevant_videos:
-                        relevant_videos[channel_id] = []
-
-                    relevant_videos[channel_id].append({
+                    # Создаем новый словарь для каждого видео
+                    relevant_videos[video_id] = {
+                        'channel_id': channel_id,
                         'video_title': video_title,
-                        'video_description': video_description,
-                        'video_id': video_id
-                    })
+                        'video_description': video_description
+                    }
 
                 next_page_token = video_response.get('nextPageToken')
                 if not next_page_token:
@@ -56,15 +67,15 @@ def get_popular_videos_with_query(youtube, query, max_videos=300):
 
 if __name__ == "__main__":
     # Подключаемся к существующей базе данных
-    conn = sqlite3.connect('existing_database.db')
+    conn = sqlite3.connect('../data/professions.db')
     cursor = conn.cursor()
 
     # Запрос на получение профессий и ключевых слов
-    cursor.execute("SELECT name, keywords FROM professions_table")
+    cursor.execute("SELECT name, keywords FROM data")
     professions = cursor.fetchall()
 
     # Подключаемся к новой базе данных
-    new_conn = sqlite3.connect('new_database.db')
+    new_conn = sqlite3.connect('../data/yt_videos_for_train.db')
     new_cursor = new_conn.cursor()
 
     # Создаем таблицу для результатов, если она еще не существует
@@ -96,15 +107,26 @@ if __name__ == "__main__":
             remaining = LIMIT - count
             # Получаем популярные видео для данной профессии
             videos_info = get_popular_videos_with_query(yt, keywords, remaining)
-            for video in videos_info:
+
+            # Debug things
+            print(name)
+            print(videos_info)
+
+            if not videos_info:
+                print(f"No videos found for {name} profession :( Probs not gonna end up well...")
+
+            for video_id, video_info in videos_info.items():
                 # Сохраняем результаты в новую базу данных
                 new_cursor.execute(
-                    "INSERT INTO videos (profession, video_id, channel_id, video_title, video_description) VALUES (?, "
+                    "INSERT INTO videos (video_id, channel_id, profession, video_title, video_description) VALUES (?, "
                     "?, ?, ?, ?)",
-                    (name, video['video_id'], video['channel_id'], video['video_title'], video['video_description']))
-                if remaining <= 0:
-                    break
-                remaining -= 1
+                    (video_id,
+                     video_info['channel_id'],
+                     name,
+                     video_info['video_title'],
+                     video_info['video_description']
+                     )
+                )
             new_conn.commit()
 
     # Закрываем соединения с базами данных

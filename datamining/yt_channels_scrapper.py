@@ -75,7 +75,7 @@ if __name__ == "__main__":
     )''')
     new_conn.commit()
 
-    yt = init_and_auth_youtube("../secrets/2google_project_secret.apps.googleusercontent.com.json")
+    yt = init_and_auth_youtube("../secrets/google_project_secret.apps.googleusercontent.com.json")
 
     LIMIT = 300
 
@@ -87,6 +87,8 @@ if __name__ == "__main__":
 
         if keywords:
             remaining = LIMIT - count
+            if remaining < 1:
+                continue
             videos_info = get_popular_videos_with_query(yt, keywords, remaining)
 
             print(keywords.replace(', ', '|'))

@@ -90,7 +90,7 @@ def update_gpt_time(db_file_path, table_name, yt_id, _time):
 
 
 def ask_gpt(query) -> str:
-    print(g4f.Provider.Bing.params)  # Print supported args for Bing
+    # print(g4f.Provider.Bing.params)  # Print supported args for Bing
 
     # Using automatic a provider for the given model
     # Streamed completion
@@ -115,8 +115,8 @@ if __name__ == "__main__":
     with open("prompts/yt_gpt_prompt.txt", encoding='utf-8', mode='r') as f:
         prompt = f.read()
 
-    db_path = '../data/large/trending_ru_yt_videos.db'  # Replace with the actual path to your SQLite database
-    table = 'videos'  # Replace with the actual table name
+    db_path = '../data/large/trending_ru_yt_videos.db'
+    table = 'videos'
     record = fetch_record(db_path, table)
     while record is not None:
         query_str = "Заголовок: " + record[2] + "\n"

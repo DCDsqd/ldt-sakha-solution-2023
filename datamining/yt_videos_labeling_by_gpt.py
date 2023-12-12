@@ -131,6 +131,7 @@ if __name__ == "__main__":
         operation_duration = end_time - start_time
 
         if gpt_labels == "" or gpt_labels is None:
+            print("Empty response or no response at all. Terminating script.")
             exit(0)
 
         print(gpt_labels)

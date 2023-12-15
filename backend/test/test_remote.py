@@ -3,7 +3,7 @@ import json
 
 ip = input('Введите ip: ')
 
-url = f'https://{ip}/predict'
+url = f'http://{ip}/predict'
 data = {
     "yt_token": "afaksfkaofmsufioasf",
     "vk_token": "",

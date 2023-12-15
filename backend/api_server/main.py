@@ -4,6 +4,10 @@ import uvicorn
 import pickle
 
 
+app = FastAPI()
+model = pickle.load(open('models/text_model.sav', 'rb'))
+
+
 class InputData(BaseModel):
     yt_token: str
     vk_token: str
@@ -12,15 +16,14 @@ class InputData(BaseModel):
     tg_psw: str
 
 
-app = FastAPI()
-model = pickle.load(open('models/text_model.sav', 'rb'))
-
-
 @app.post("/predict")
 def predict(input_data: InputData):
     try:
         prediction = model.predict([input_data.yt_token])
-        return {"prediction": prediction.tolist()}
+        return {
+            "predictions": prediction.tolist(),
+            "predictions_score": prediction.tolist(),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -4,7 +4,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import json
 
-from backend.parser.common import remove_urls
+from backend.api_server.parser.common import remove_urls
 
 
 def init_and_auth_youtube(client_secrets_file_path):

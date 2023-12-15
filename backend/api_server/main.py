@@ -25,6 +25,8 @@ def predict(input_data: InputData):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Unicorn: uvicorn main:app
+
 # При запуске с помощью Uvicorn, этот блок не требуется.
 # Если вы запускаете файл напрямую, он позволяет запустить сервер.
 if __name__ == "__main__":

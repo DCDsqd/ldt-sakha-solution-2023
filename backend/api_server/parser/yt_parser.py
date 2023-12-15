@@ -2,12 +2,42 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+from google.oauth2.credentials import Credentials
 import json
 
 from backend.api_server.parser.common import remove_urls
 
 
-def init_and_auth_youtube(client_secrets_file_path):
+def init_youtube_with_user_token(token, client_secrets_file_path, refresh_token=None):
+    api_service_name = "youtube"
+    api_version = "v3"
+
+    # Чтение client_id и client_secret из файла с секретами клиента
+    with open(client_secrets_file_path, 'r') as file:
+        secrets_data = json.load(file)
+        client_id = secrets_data['installed']['client_id']
+        client_secret = secrets_data['installed']['client_secret']
+
+    credentials = Credentials(
+        token=token,
+        refresh_token=refresh_token,
+        token_uri='https://oauth2.googleapis.com/token',
+        client_id=client_id,
+        client_secret=client_secret
+    )
+
+    try:
+        youtube = googleapiclient.discovery.build(
+            api_service_name, api_version, credentials=credentials
+        )
+    except Exception as e:
+        print(f"Error during YouTube client initialization: {e}")
+        return None
+
+    return youtube
+
+
+def init_and_auth_youtube_local_server(client_secrets_file_path):
     # Disable/Enable OAuthlib's HTTPS verification when running locally.
     # DO NOT leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
@@ -43,12 +73,13 @@ def get_yt_category_map(youtube_api, region_code="RU"):
 
 # A class to represent a YouTube video
 class YTVideoInfo:
-    def __init__(self, title, desc, category):
+    def __init__(self, title, desc, category, yt_video_id=None):
         self.title = title
         self.desc = desc
         self.category = category
+        self.yt_video_id = yt_video_id
 
-        self.desc = remove_urls(self.desc)
+        self.desc = self.desc
 
     def __str__(self):
         """
@@ -90,7 +121,7 @@ class YTChannel:
         playlist_request = youtube_api.playlistItems().list(
             part="contentDetails",
             playlistId=upload_playlist_id,
-            maxResults=50  # Adjust as needed
+            maxResults=10  # Adjust as needed
         )
         playlist_response = playlist_request.execute()
 
@@ -116,7 +147,48 @@ class YTChannel:
         return video_data
 
 
-def get_user_yt_subscriptions(youtube) -> list[YTChannel]:
+def get_user_liked_videos(youtube, max_results=100) -> list[YTVideoInfo]:
+    # Получаем ID плейлиста с лайкнутыми видео
+    channels_response = youtube.channels().list(
+        part="contentDetails",
+        mine=True
+    ).execute()
+
+    liked_videos_playlist_id = channels_response['items'][0]['contentDetails']['relatedPlaylists']['likes']
+
+    # Получаем видео из плейлиста лайкнутых видео
+    playlist_request = youtube.playlistItems().list(
+        part="snippet",
+        playlistId=liked_videos_playlist_id,
+        maxResults=min(max_results, 50)  # YouTube API ограничивает maxResults значением 50
+    )
+
+    liked_videos = []
+    while playlist_request and len(liked_videos) < max_results:
+        playlist_response = playlist_request.execute()
+        for item in playlist_response['items']:
+            if len(liked_videos) >= max_results:
+                break  # Прекращаем добавление видео, если достигнут предел max_results
+
+            video_title = item['snippet']['title']
+            video_id = item['snippet']['resourceId']['videoId']
+            video_description = item['snippet']['description']
+
+            # "Default" заглушка для категории, т. к. пока нет планов использовать категорию
+            liked_videos.append(YTVideoInfo(video_title, video_description, "Default", video_id))
+
+        # Переходим к следующей странице результатов, если она есть и не превышен лимит
+        if 'nextPageToken' in playlist_response and len(liked_videos) < max_results:
+            playlist_request = youtube.playlistItems().list_next(
+                playlist_request, playlist_response
+            )
+        else:
+            break
+
+    return liked_videos
+
+
+def get_user_yt_subscriptions(youtube, limit=100) -> list[YTChannel]:
     def get_subscriptions(page_token=None):
         return youtube.subscriptions().list(
             part="snippet",

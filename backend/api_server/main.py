@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import pickle
+from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, YTChannel, YTVideoInfo
 
 
 app = FastAPI()
@@ -19,6 +20,18 @@ class InputData(BaseModel):
 @app.post("/predict")
 def predict(input_data: InputData):
     try:
+        # YouTube section
+
+        # Initialize YT API
+        youtube_api_instance = init_youtube_with_user_token(
+            input_data.yt_token,
+            'secrets/google_project_secret.apps.googleusercontent.com.json'  # Path to Google App Credentials
+        )
+
+        # Get list of user subscriptions
+        youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
+        youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
+
         prediction = model.predict([input_data.yt_token])
         return {
             "predictions": prediction.tolist(),

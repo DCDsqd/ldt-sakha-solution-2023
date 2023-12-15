@@ -30,4 +30,4 @@ def predict(input_data: InputData):
 # При запуске с помощью Uvicorn, этот блок не требуется.
 # Если вы запускаете файл напрямую, он позволяет запустить сервер.
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8090)

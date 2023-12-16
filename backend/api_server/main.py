@@ -13,12 +13,12 @@ from ml.helpers import load_sklearn_model
 
 
 app = FastAPI()
-with open(filename, 'rb') as file:
-    model = pickle.load(file)
-with open('text_model_tfidf_vectorizer.pkl', 'rb') as file:
-    loaded_tfidf_vectorizer = pickle.load(file)
+with open('text_model.sav', 'rb') as file:
+    text_model = pickle.load(file)
+# with open('text_model_tfidf_vectorizer.pkl', 'rb') as file:
+#     loaded_tfidf_vectorizer = pickle.load(file)
 with open('text_model_mlb.pkl', 'rb') as file:
-    loaded_mlb = pickle.load(file)
+    multi_label_binarizer = pickle.load(file)
 
 
 # Class that represents API input structure

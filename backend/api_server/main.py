@@ -27,10 +27,20 @@ class InputData(BaseModel):
 def predict(input_data: InputData):
     if input_data.debug_text != "":
         predicted_probabilities = text_model.predict_proba([input_data.debug_text])[0]
-        print(predicted_probabilities)
+
+        # Фильтруем классы и их вероятности по заданному порогу
+        threshold = 0.1
+        filtered_predictions = [(label, prob) for label, prob
+                                in zip(multi_label_binarizer.classes_, predicted_probabilities)
+                                if prob >= threshold]
+
+        # Разделяем классы и их вероятности
+        predictions_classes = [label for label, _ in filtered_predictions]
+        predictions_score = [prob for _, prob in filtered_predictions]
+
         return {
-            "predictions_score": predicted_probabilities.tolist(),
-            "predictions_classes": predicted_probabilities.tolist(),
+            "predictions_score": predictions_score,
+            "predictions_classes": predictions_classes,
         }
 
     # VK section

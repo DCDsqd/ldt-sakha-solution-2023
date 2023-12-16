@@ -29,8 +29,8 @@ def predict(input_data: InputData):
         predicted_probabilities = text_model.predict_proba([input_data.debug_text])[0]
         print(predicted_probabilities)
         return {
-            "predictions_score": predicted_probabilities,
-            "predictions_classes": predicted_probabilities,
+            "predictions_score": predicted_probabilities.tolist(),
+            "predictions_classes": predicted_probabilities.tolist(),
         }
 
     # VK section
@@ -89,7 +89,7 @@ def predict(input_data: InputData):
     }
 
 
-# Чтобы запустить с помощью Unicorn: uvicorn main:app
+# Чтобы запустить с помощью Unicorn: uvicorn main:app --host 0.0.0.0 --port 8090 (example)
 
 # При запуске с помощью Uvicorn, этот блок не требуется.
 # Если вы запускаете файл напрямую, он позволяет запустить сервер.

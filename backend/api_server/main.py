@@ -2,14 +2,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import pickle
-from sklearn.feature_extraction.text import TfidfVectorizer
-import nltk
-from nltk.corpus import stopwords
 
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
-from parser.common import clean_text_for_model
-
+from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 
 app = FastAPI()
 text_model = pickle.load(open('models/text_model.sav', 'rb'))
@@ -28,41 +24,43 @@ class InputData(BaseModel):
 
 @app.post("/predict")
 def predict(input_data: InputData):
-    try:
-        # YouTube section
+    # VK section
 
-        # Initialize YT API
-        youtube_api_instance = init_youtube_with_user_token(
-            input_data.yt_token,
-            'secrets/google_project_secret.apps.googleusercontent.com.json'  # Path to Google App Credentials
-        )
+    # YouTube section
+    if input_data.yt_token is not "" and input_data.yt_token is not None:
+        try:
+            # Initialize YT API
+            youtube_api_instance = init_youtube_with_user_token(
+                input_data.yt_token,
+                'secrets/google_project_secret.apps.googleusercontent.com.json'  # Path to Google App Credentials
+            )
 
-        # Get list of user subscriptions
-        youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
-        youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
+            # Get list of user subscriptions
+            youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
+            youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
 
-        for youtube_user_subbed_channel in youtube_user_subscriptions:
-            channel_videos = youtube_user_subbed_channel.gather_videos(youtube_user_likes)
-            united_text = " ".join([video.concatenate_text() for video in channel_videos])
-            united_text = clean_text_for_model(united_text)
+            subscriptions_average_classes_score_dict, subscriptions_most_impactful_channels = \
+                analyze_youtube_user_subscriptions(
+                    youtube_user_subscriptions,
+                    text_model,
+                    multi_label_binarizer
+                )
+            likes_average_classes_score_dict, likes_most_impactful_videos = analyze_youtube_list_of_vids(
+                youtube_user_likes,
+                text_model,
+                multi_label_binarizer
+            )
 
-            text_model.predict()
+        except Exception as e:
+            print(e)
 
-            # Получение предсказаний вероятности
-            predicted_probabilities = text_model.predict_proba(transformed_text)
+        # Do not raise an exception for now
+        # raise HTTPException(status_code=500, detail=str(e))
 
-            # Преобразование вероятностей в список для JSON сериализации
-            probabilities_list = predicted_probabilities.tolist()
-
-            # Получение названий классов
-            classes_list = mlb.classes_.tolist()
-
-        return {
-            "predictions_score": probabilities_list,
-            "predictions_classes": classes_list,
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {
+        "predictions_score": average_results,
+        "predictions_classes": classes_list,
+    }
 
 
 # Unicorn: uvicorn main:app

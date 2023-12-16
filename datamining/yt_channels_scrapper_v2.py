@@ -1,20 +1,10 @@
-import os
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import googleapiclient.errors
-import json
-
-from backend.parser.common import remove_urls
-
-
-from backend.parser.yt_parser import init_and_auth_youtube
-import googleapiclient.errors
+from backend.api_server.parser.yt_parser import init_and_auth_youtube_local_server
 import sqlite3
 
 
 def get_popular_videos_with_query(youtube, query: str, next_page_token=None):
     relevant_videos = {}  # Dictionary for storing video information, key - video_id
-    query_list = query.split(', ')[:7]
+    query_list = query.split(', ')[:5]
     query_string = '|'.join(query_list)
 
     # Debug
@@ -72,10 +62,11 @@ if __name__ == "__main__":
     )''')
     new_conn.commit()
 
-    yt = init_and_auth_youtube("../secrets/11google_project_secret.apps.googleusercontent.com.json")
+    yt = init_and_auth_youtube_local_server("../backend/api_server/secrets/4google_project_secret.apps"
+                                            ".googleusercontent.com.json")
 
     for name, keywords in professions:
-        if name != "Фельдшер":
+        if name != "Реставратор":
             continue
 
         if not keywords:

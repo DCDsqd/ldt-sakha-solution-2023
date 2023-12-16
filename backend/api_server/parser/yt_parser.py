@@ -71,7 +71,7 @@ def get_yt_category_map(youtube_api, region_code="RU"):
 
 # A class to represent a YouTube video
 class YTVideoInfo:
-    def __init__(self, title, desc, category, yt_video_id=None):
+    def __init__(self, title, desc, category, yt_video_id):
         self.title = title
         self.desc = desc
         self.category = category
@@ -143,8 +143,9 @@ class YTChannel:
             description = video['snippet']['description']
             category_id = video['snippet']['categoryId']
             category = category_map.get(category_id, "Unknown")
+            video_id = video['id']
 
-            video_data.append(YTVideoInfo(title, description, category))
+            video_data.append(YTVideoInfo(title, description, category, video_id))
 
         return video_data
 

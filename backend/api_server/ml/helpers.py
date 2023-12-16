@@ -1,5 +1,32 @@
 import zlib
 import numpy as np
+from google.cloud import storage
+import os
+import requests
+
+
+def download_file_from_dropbox(url, local_destination):
+    """Загружает файл по URL и сохраняет его локально."""
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(local_destination, 'wb') as file:
+            file.write(response.content)
+        print(f"Файл успешно загружен и сохранен в {local_destination}")
+    else:
+        print("Ошибка при загрузке файла:", response.status_code)
+
+
+def download_model_if_not_exists(local_model_path, bucket_name, blob_name):
+    """Загружает модель с Google Cloud Storage, если она не существует локально."""
+    if not os.path.exists(local_model_path):
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+
+        blob.download_to_filename(local_model_path)
+        print(f"Модель загружена из GCS и сохранена локально: {local_model_path}")
+    else:
+        print("Модель уже существует локально.")
 
 
 def save_sklearn_model(model, filename):

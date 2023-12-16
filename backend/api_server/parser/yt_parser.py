@@ -5,8 +5,6 @@ import googleapiclient.errors
 from google.oauth2.credentials import Credentials
 import json
 
-from backend.api_server.parser.common import remove_urls
-
 
 def init_youtube_with_user_token(token, client_secrets_file_path, refresh_token=None):
     api_service_name = "youtube"

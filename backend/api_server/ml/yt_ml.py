@@ -1,7 +1,7 @@
 import numpy as np
 
-from backend.api_server.parser.common import clean_text_for_model
-from backend.api_server.parser.yt_parser import YTChannel, YTVideoInfo
+from ..parser.common import clean_text_for_model
+from ..parser.yt_parser import YTChannel, YTVideoInfo
 
 
 def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],

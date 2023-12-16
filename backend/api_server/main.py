@@ -6,6 +6,7 @@ import pickle
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
+from parser.vk_parser import init_vk_api_session, get_self_vk_data
 
 app = FastAPI()
 text_model = pickle.load(open('models/text_model.sav', 'rb'))
@@ -25,6 +26,11 @@ class InputData(BaseModel):
 @app.post("/predict")
 def predict(input_data: InputData):
     # VK section
+    if input_data.vk_token is None or input_data.vk_token == "":
+        print('NO VK TOKEN PROVIDED! Should never happen!')
+
+    vk = init_vk_api_session(input_data.vk_token)
+    vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
     # YouTube section
     if input_data.yt_token is not "" and input_data.yt_token is not None:
@@ -54,7 +60,7 @@ def predict(input_data: InputData):
         except Exception as e:
             print(e)
 
-        # Do not raise an exception for now
+        # Do not raise an exception for now (yt api quota lack might cause this, we don't want to terminate cause of it)
         # raise HTTPException(status_code=500, detail=str(e))
 
     return {

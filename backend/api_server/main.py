@@ -7,7 +7,7 @@ from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscript
     YTChannel, YTVideoInfo
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 from parser.vk_parser import init_vk_api_session, get_self_vk_data
-from ml.vk_ml import analyze_vk_groups
+from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 
 app = FastAPI()
 text_model = pickle.load(open('models/text_model.sav', 'rb'))
@@ -19,13 +19,19 @@ multi_label_binarizer = pickle.load(open('models/text_model_mlb.pkl', 'rb'))
 class InputData(BaseModel):
     yt_token: str
     vk_token: str
-    tg_token: str
-    tg_login: str
-    tg_psw: str
+    debug_text: str
 
 
 @app.post("/predict")
 def predict(input_data: InputData):
+    if input_data.debug_text != "":
+        predicted_probabilities = text_model.predict_proba([input_data.debug_text])[0]
+        print(predicted_probabilities)
+        return {
+            "predictions_score": predicted_probabilities,
+            "predictions_classes": predicted_probabilities,
+        }
+
     # VK section
     if input_data.vk_token is None or input_data.vk_token == "":
         print('NO VK TOKEN PROVIDED! Should never happen!')
@@ -34,12 +40,16 @@ def predict(input_data: InputData):
     vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
     vk_groups_average_classes_score_dict = analyze_vk_groups(
-        vk_groups,
+        vk_user_likes,
         text_model,
         multi_label_binarizer
     )
 
-
+    vk_likes_average_classes_score_dict = analyze_vk_likes(
+        vk_groups,
+        text_model,
+        multi_label_binarizer
+    )
 
     # YouTube section
     if input_data.yt_token is not "" and input_data.yt_token is not None:

@@ -21,10 +21,9 @@ class VKGroup:
 
 
 class VKWallPost:
-    def __init__(self, post_id, owner_id, date, text):
+    def __init__(self, post_id, owner_id, text):
         self.post_id = post_id
         self.owner_id = owner_id
-        self.date = date  # Дата публикации в формате Unix time
         self.text = text  # Текст поста
 
 
@@ -62,20 +61,37 @@ def get_self_vk_data(vk, wall_limit=50, likes_limit=100):
         vk_group = get_group_data(vk, group_data['id'])
         vk_groups.append(vk_group)
 
-    # Получение записей со стены пользователя
-    wall_data = vk.wall.get(count=wall_limit)
-    vk_wall_posts = [VKWallPost(post['id'], post['owner_id'], post['date'], post['text']) for post in
-                     wall_data['items']]
+    # Получение и фильтрация записей со стены пользователя
+    filtered_wall_posts = []
+    wall_offset = 0
+    while len(filtered_wall_posts) < wall_limit:
+        wall_data = vk.wall.get(count=100, offset=wall_offset)
+        if not wall_data['items']:
+            break
+        for item in wall_data['items']:
+            if len(item['text']) >= 35:
+                post = VKWallPost(post_id=item['id'], owner_id=item['owner_id'], text=item['text'])
+                filtered_wall_posts.append(post)
+            if len(filtered_wall_posts) >= wall_limit:
+                break
+        wall_offset += 100
 
     # Получение информации о лайках, сделанных пользователем
     user_likes = []
-    for item in vk.wall.get(count=wall_limit)['items']:
-        # Проверяем, достаточно ли длинный текст в посте
-        if len(item['text']) >= 35:
-            like_obj = VKLike(item_id=item['id'], owner_id=item['owner_id'], text=item['text'])
-            user_likes.append(like_obj)
+    likes_offset = 0
+    while len(user_likes) < likes_limit:
+        likes_data = vk.wall.get(count=100, offset=likes_offset)
+        if not likes_data['items']:
+            break
+        for item in likes_data['items']:
+            if len(item['text']) >= 35:
+                like_obj = VKLike(item_id=item['id'], owner_id=item['owner_id'], text=item['text'])
+                user_likes.append(like_obj)
+            if len(user_likes) >= likes_limit:
+                break
+        likes_offset += 100
 
-    return vk_groups, vk_wall_posts, user_likes
+    return vk_groups, filtered_wall_posts, user_likes
 
 
 def get_vk_data(vk, vk_user_id):

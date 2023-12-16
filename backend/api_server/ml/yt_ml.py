@@ -6,7 +6,7 @@ from backend.api_server.parser.yt_parser import YTChannel, YTVideoInfo
 
 def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],
                                  text_model,
-                                 multi_label_binarizer):
+                                 multi_label_binarizer) -> (dict, list):
     classes_list = multi_label_binarizer.classes_
     num_classes = len(classes_list)
 

@@ -29,9 +29,10 @@ class VKWallPost:
 
 
 class VKLike:
-    def __init__(self, item_id, owner_id):
+    def __init__(self, item_id, owner_id, text):
         self.item_id = item_id  # ID поста, которому пользователь поставил лайк
         self.owner_id = owner_id  # ID владельца поста
+        self.text = text  # Текст поста
 
 
 def get_group_data(vk, group_id):
@@ -66,12 +67,15 @@ def get_self_vk_data(vk, wall_limit=50, likes_limit=100):
     vk_wall_posts = [VKWallPost(post['id'], post['owner_id'], post['date'], post['text']) for post in
                      wall_data['items']]
 
-    # Получение лайков для последних постов
     # Получение информации о лайках, сделанных пользователем
-    user_likes = vk.likes.getList(type='post', count=likes_limit)
-    vk_user_likes = [VKLike(item['id'], item['owner_id']) for item in user_likes['items']]
+    user_likes = []
+    for item in vk.wall.get(count=wall_limit)['items']:
+        # Проверяем, достаточно ли длинный текст в посте
+        if len(item['text']) >= 35:
+            like_obj = VKLike(item_id=item['id'], owner_id=item['owner_id'], text=item['text'])
+            user_likes.append(like_obj)
 
-    return vk_groups, vk_wall_posts, vk_user_likes
+    return vk_groups, vk_wall_posts, user_likes
 
 
 def get_vk_data(vk, vk_user_id):

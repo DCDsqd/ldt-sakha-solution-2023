@@ -7,6 +7,7 @@ from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscript
     YTChannel, YTVideoInfo
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 from parser.vk_parser import init_vk_api_session, get_self_vk_data
+from ml.vk_ml import analyze_vk_groups
 
 app = FastAPI()
 text_model = pickle.load(open('models/text_model.sav', 'rb'))
@@ -32,6 +33,14 @@ def predict(input_data: InputData):
     vk = init_vk_api_session(input_data.vk_token)
     vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
+    vk_groups_average_classes_score_dict = analyze_vk_groups(
+        vk_groups,
+        text_model,
+        multi_label_binarizer
+    )
+
+
+
     # YouTube section
     if input_data.yt_token is not "" and input_data.yt_token is not None:
         try:
@@ -45,13 +54,13 @@ def predict(input_data: InputData):
             youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
             youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
 
-            subscriptions_average_classes_score_dict, subscriptions_most_impactful_channels = \
+            yt_subscriptions_average_classes_score_dict, subscriptions_most_impactful_channels = \
                 analyze_youtube_user_subscriptions(
                     youtube_user_subscriptions,
                     text_model,
                     multi_label_binarizer
                 )
-            likes_average_classes_score_dict, likes_most_impactful_videos = analyze_youtube_list_of_vids(
+            yt_likes_average_classes_score_dict, likes_most_impactful_videos = analyze_youtube_list_of_vids(
                 youtube_user_likes,
                 text_model,
                 multi_label_binarizer

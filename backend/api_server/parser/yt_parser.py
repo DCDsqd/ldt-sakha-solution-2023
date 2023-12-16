@@ -88,6 +88,10 @@ class YTVideoInfo:
         """
         return f"Video title: {self.title}\nDescription: {self.desc}\nCategory: {self.category}"
 
+    def concatenate_text(self, include_category: bool = False) -> str:
+        return " ".join([self.title, self.desc]) if include_category else \
+               " ".join([self.title, self.desc, self.category])
+
 
 # A class to represent a YouTube channel with all the needed data for further processing
 class YTChannel:
@@ -103,7 +107,7 @@ class YTChannel:
         """
         return f"Channel ID: {self.yt_id}\nTitle: {self.title}\nDescription: {self.desc}"
 
-    def analyze_videos(self, youtube_api) -> list[YTVideoInfo]:
+    def gather_videos(self, youtube_api, max_results=10) -> list[YTVideoInfo]:
         # print(f"Analyzing videos for channel ID: {self.yt_id}")
 
         category_map = get_yt_category_map(youtube_api)
@@ -121,7 +125,7 @@ class YTChannel:
         playlist_request = youtube_api.playlistItems().list(
             part="contentDetails",
             playlistId=upload_playlist_id,
-            maxResults=10  # Adjust as needed
+            maxResults=max_results
         )
         playlist_response = playlist_request.execute()
 
@@ -221,9 +225,11 @@ def get_user_yt_subscriptions(youtube, limit=100) -> list[YTChannel]:
 
     return sub_list
 
+# Just a minimal usage example for testing purposes
 
-# yt = init_and_auth_youtube("../../secrets/google_project_secret.apps.googleusercontent.com.json")
+# if __name__ == "__main__":
+# yt = init_and_auth_youtube("../secrets/google_project_secret.apps.googleusercontent.com.json")
 # res = get_user_yt_subscriptions(yt)
 # print(res)
 
-# print(res[2].analyze_videos(yt)[0])
+# print(res[2].gather_videos(yt)[0])

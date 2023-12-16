@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
-import pickle
+import skops.io as sio
+import joblib
+
 
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
@@ -11,9 +13,10 @@ from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 
 
 app = FastAPI()
-text_model = pickle.load(open('models/text_model.sav', 'rb'))
-loaded_tfidf_vectorizer = pickle.load(open('models/text_model_tfidf_vectorizer.pkl', 'rb'))
-multi_label_binarizer = pickle.load(open('models/text_model_mlb.pkl', 'rb'))
+text_model = joblib.load('models/text_model.sav', 'rb')
+# text_model = sio.load('models/text_model.sav', 'rb')
+loaded_tfidf_vectorizer = sio.load('models/text_model_tfidf_vectorizer.pkl', 'rb')
+multi_label_binarizer = sio.load('models/text_model_mlb.pkl', 'rb')
 
 
 # Class that represents API input structure

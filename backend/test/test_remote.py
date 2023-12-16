@@ -7,9 +7,7 @@ url = f'http://{ip}/predict'
 data = {
     "yt_token": "afaksfkaofmsufioasf",
     "vk_token": "",
-    "tg_token": "",
-    "tg_login": "",
-    "tg_psw": ""
+    "debug_text": "вау я люблю лечить людей и быть врачем ммм круто"
 }
 
 response = requests.post(url, json=data)

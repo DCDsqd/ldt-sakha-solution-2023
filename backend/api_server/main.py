@@ -88,7 +88,7 @@ def predict(input_data: InputData):
     }
 
 
-# Unicorn: uvicorn main:app
+# Чтобы запустить с помощью Unicorn: uvicorn main:app
 
 # При запуске с помощью Uvicorn, этот блок не требуется.
 # Если вы запускаете файл напрямую, он позволяет запустить сервер.

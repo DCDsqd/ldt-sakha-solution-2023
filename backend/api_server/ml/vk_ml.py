@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..parser.vk_parser import VKGroup, VKLike, VKWallPost
+from parser.vk_parser import VKGroup, VKLike, VKWallPost
 
 
 def analyze_vk_groups(vk_groups: list[VKGroup], text_model, multi_label_binarizer):

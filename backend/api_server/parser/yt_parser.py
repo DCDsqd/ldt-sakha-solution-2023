@@ -209,9 +209,9 @@ def get_user_yt_subscriptions(youtube, limit=100) -> list[YTChannel]:
         subscriptions = get_subscriptions(subscriptions['nextPageToken'])
         all_subscriptions.extend(subscriptions.get('items', []))
 
-    file_path = 'latest_youtube_subscriptions_answer.json'
-    with open(file_path, 'w', encoding='utf-8') as file:
-        json.dump(all_subscriptions, file, ensure_ascii=False, indent=4)
+    # file_path = 'latest_youtube_subscriptions_answer.json'
+    # with open(file_path, 'w', encoding='utf-8') as file:
+    #     json.dump(all_subscriptions, file, ensure_ascii=False, indent=4)
 
     sub_list = []
 

@@ -2,20 +2,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import pickle
-import sys
-from pathlib import Path
 
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 from parser.vk_parser import init_vk_api_session, get_self_vk_data
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
-
-
-# Добавляем корневую папку проекта в sys.path
-root_path = str(Path(__file__).resolve().parent.parent)  # Поднимаемся на два уровня выше от текущего файла
-if root_path not in sys.path:
-    sys.path.append(root_path)
 
 
 app = FastAPI()
@@ -61,7 +53,7 @@ def predict(input_data: InputData):
     )
 
     # YouTube section
-    if input_data.yt_token is not "" and input_data.yt_token is not None:
+    if input_data.yt_token != "" and input_data.yt_token is not None:
         try:
             # Initialize YT API
             youtube_api_instance = init_youtube_with_user_token(

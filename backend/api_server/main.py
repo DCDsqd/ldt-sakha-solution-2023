@@ -34,7 +34,7 @@ def predict(input_data: InputData):
         predicted_probabilities = text_model.predict_proba([input_data.debug_text])[0]
 
         # Фильтруем классы и их вероятности по заданному порогу
-        threshold = 0.1
+        threshold = 0.01
         filtered_predictions = [(label, prob) for label, prob
                                 in zip(multi_label_binarizer.classes_, predicted_probabilities)
                                 if prob >= threshold]

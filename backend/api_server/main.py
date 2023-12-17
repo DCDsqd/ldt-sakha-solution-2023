@@ -1,21 +1,47 @@
 import torch
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 import uvicorn
 import pickle
 from transformers import BertTokenizer, BertForSequenceClassification
 import json
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
+
 
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
-    YTChannel, YTVideoInfo
+    YTChannel, YTVideoInfo, get_youtube_channel_id
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 from parser.vk_parser import init_vk_api_session, get_self_vk_data, VKLike, VKWallPost, VKGroup
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
 from ml.tg_ml import analyze_tg_list_of_texts
 
+from db.db_func import yt_save_data_to_db, yt_get_by_id, vk_save_data_to_db, vk_get_by_id, tg_save_data_to_db, \
+    tg_get_by_id
+
+
 with open('cfg.json', 'r', encoding='utf-8') as f:
     cfg = json.load(f)
+
+SQLALCHEMY_DATABASE_URL = cfg['db_path']
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+# Dependency to get the DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+Base = declarative_base()
 
 app = FastAPI()
 
@@ -48,7 +74,7 @@ class InputData(BaseModel):
 
 
 @app.post("/predict")
-def predict(input_data: InputData):
+def predict(input_data: InputData, db: Session = Depends(get_db)):
     # VK section
     vk_sum_dict = None
     vk_most_impactful_liked_posts = None
@@ -96,40 +122,47 @@ def predict(input_data: InputData):
                 'secrets/google_project_secret.apps.googleusercontent.com.json'  # Path to Google App Credentials
             )
 
-            print("inited yt", type(youtube_api_instance))
+            yt_self_id = get_youtube_channel_id(youtube_api_instance)
 
-            # Get list of user subscriptions
-            youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
-            youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
+            yt_cached_res = yt_get_by_id(db, yt_self_id)
+            if yt_cached_res is not None:
+                yt_sum_dict = yt_cached_res
+            else:
 
-            yt_subscriptions_average_classes_score_dict, yt_subscriptions_most_impactful_channels = \
-                analyze_youtube_user_subscriptions(
-                    youtube_user_subscriptions,
+                # Get list of user subscriptions
+                youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
+                youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
+
+                yt_subscriptions_average_classes_score_dict, yt_subscriptions_most_impactful_channels = \
+                    analyze_youtube_user_subscriptions(
+                        youtube_user_subscriptions,
+                        text_model,
+                        multi_label_binarizer,
+                        youtube_api_instance,
+                        USE_BERT,
+                        tokenizer
+                    )
+
+                if len(yt_subscriptions_most_impactful_channels) > 5:
+                    yt_subscriptions_most_impactful_channels = yt_subscriptions_most_impactful_channels[:5]
+
+                yt_likes_average_classes_score_dict, yt_likes_most_impactful_videos = analyze_youtube_list_of_vids(
+                    youtube_user_likes,
                     text_model,
                     multi_label_binarizer,
-                    youtube_api_instance,
                     USE_BERT,
                     tokenizer
                 )
 
-            if len(yt_subscriptions_most_impactful_channels) > 5:
-                yt_subscriptions_most_impactful_channels = yt_subscriptions_most_impactful_channels[:5]
+                if len(yt_likes_most_impactful_videos) > 5:
+                    yt_likes_most_impactful_videos = yt_likes_most_impactful_videos[:5]
 
-            yt_likes_average_classes_score_dict, yt_likes_most_impactful_videos = analyze_youtube_list_of_vids(
-                youtube_user_likes,
-                text_model,
-                multi_label_binarizer,
-                USE_BERT,
-                tokenizer
-            )
+                yt_sum_dict = merge_and_average_dicts(yt_subscriptions_average_classes_score_dict,
+                                                      yt_likes_average_classes_score_dict,
+                                                      weight1=2,
+                                                      weight2=1)
 
-            if len(yt_likes_most_impactful_videos) > 5:
-                yt_likes_most_impactful_videos = yt_likes_most_impactful_videos[:5]
-
-            yt_sum_dict = merge_and_average_dicts(yt_subscriptions_average_classes_score_dict,
-                                                  yt_likes_average_classes_score_dict,
-                                                  weight1=2,
-                                                  weight2=1)
+                yt_save_data_to_db(db, yt_self_id, yt_sum_dict)
 
         except Exception as e:
             print(e)

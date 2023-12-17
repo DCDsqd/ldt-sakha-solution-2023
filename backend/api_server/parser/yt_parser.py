@@ -261,6 +261,22 @@ def get_user_yt_subscriptions(youtube, limit=150) -> list[YTChannel]:
 
     return sub_list
 
+
+# Выполнение запроса к API для получения информации о канале
+def get_youtube_channel_id(youtube):
+    # Выполнение запроса к API для получения информации о канале
+    request = youtube.channels().list(
+        part='snippet',
+        mine=True
+    )
+    response = request.execute()
+
+    # Получение и возвращение YouTube ID канала
+    if 'items' in response and response['items']:
+        return response['items'][0]['id']
+    else:
+        return None
+
 # Just a minimal usage example for testing purposes
 
 # if __name__ == "__main__":

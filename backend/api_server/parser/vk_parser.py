@@ -44,8 +44,7 @@ class VKLike:
     def to_json(self):
         """Преобразование объекта канал в JSON-подобный словарь."""
         return {
-            "name": self.title,
-            "id": self.yt_id
+            "owner_id": self.owner_id
         }
 
 

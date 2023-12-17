@@ -143,7 +143,7 @@ def predict(input_data: InputData):
         "top_probabilities": top_probs,
         "yt_impactful_likes": yt_likes_most_impactful_videos_json,
         "yt_impactful_channels": yt_subscriptions_most_impactful_channels_json,
-        "vk_impactful_posts": vk_most_impactful_liked_posts_json,
+        "vk_impactful_likes": vk_most_impactful_liked_posts_json,
         "vk_impactful_groups": vk_most_impactful_groups_json
     }
 

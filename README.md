@@ -40,10 +40,10 @@ Backend сервиса также поддерживает анализ Telegram
 
 ## Интерфейс
 Дэшборд и интерфейс авторизации:
-![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/7ac81c9c-9d7f-4de2-8356-ad63e3dd0860) <br>
+![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/7ac81c9c-9d7f-4de2-8356-ad63e3dd0860) <br><br>
 ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/b9ae0855-0871-497d-b3b0-999e2195b09d) <br>
 Интерфейс результатов: <br>
-![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/91453fe9-9f05-4800-bbc0-42d7b9bb59e6)
+![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/91453fe9-9f05-4800-bbc0-42d7b9bb59e6) <br><br>
 ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/22acf9f3-55f7-4f6d-803e-4fadc3708e31)
 
 

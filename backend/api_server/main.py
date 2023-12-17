@@ -6,7 +6,7 @@ import pickle
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
-from parser.vk_parser import init_vk_api_session, get_self_vk_data
+from parser.vk_parser import init_vk_api_session, get_self_vk_data, VKLike, VKWallPost, VKGroup
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
 
@@ -42,10 +42,10 @@ def predict(input_data: InputData):
         return {
             "top_professions": predictions_classes,
             "top_probabilities": predictions_score,
-            "yt_impactful_likes": [],
-            "yt_impactful_channels": [],
-            "vk_impactful_likes": [],
-            "vk_impactful_groups": []
+            "yt_impactful_likes": [YTVideoInfo("sdddd", "asasss", "ass", "sssssss2f32f").to_json()],
+            "yt_impactful_channels": [YTChannel("id", "adlks", "asasa").to_json()],
+            "vk_impactful_likes": [VKLike(1, 1, "adsd").to_json()],
+            "vk_impactful_groups": [VKGroup(1, "dafsf", "dfsf", 2222, "as").to_json()]
         }
 
     # VK section

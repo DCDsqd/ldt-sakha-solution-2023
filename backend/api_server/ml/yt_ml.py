@@ -2,11 +2,14 @@ import numpy as np
 
 from parser.common import clean_text_for_model
 from parser.yt_parser import YTChannel, YTVideoInfo
+from model_predict import universal_predict
 
 
 def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],
                                  text_model,
-                                 multi_label_binarizer) -> (dict, list[YTVideoInfo]):
+                                 multi_label_binarizer,
+                                 USE_BERT,
+                                 tokenizer) -> (dict, list[YTVideoInfo]):
     classes_list = multi_label_binarizer.classes_
     num_classes = len(classes_list)
 
@@ -47,7 +50,9 @@ def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],
 def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChannel],
                                        text_model,
                                        multi_label_binarizer,
-                                       youtube_api_instance) -> (dict, list[YTChannel]):
+                                       youtube_api_instance,
+                                       USE_BERT,
+                                       tokenizer) -> (dict, list[YTChannel]):
     classes_list = multi_label_binarizer.classes_
     num_classes = len(classes_list)
     total_channel_probabilities = np.zeros(num_classes)
@@ -60,7 +65,13 @@ def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChanne
             for video in channel_videos:
                 concat_text = video.concatenate_text()
                 concat_text = clean_text_for_model(concat_text)
-                predicted_probabilities = text_model.predict_proba([concat_text])[0]
+                _predictions_classes, predicted_probabilities = universal_predict(
+                    text_model,
+                    USE_BERT,
+                    concat_text,
+                    tokenizer,
+                    multi_label_binarizer
+                )
                 total_channel_probabilities += predicted_probabilities
                 channel_count += (predicted_probabilities > 0).astype(int)
 
@@ -79,7 +90,13 @@ def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChanne
             for video in channel_videos:
                 concat_text = video.concatenate_text()
                 concat_text = clean_text_for_model(concat_text)
-                predicted_probabilities = text_model.predict_proba([concat_text])[0]
+                _predictions_classes, predicted_probabilities = universal_predict(
+                    text_model,
+                    USE_BERT,
+                    concat_text,
+                    tokenizer,
+                    multi_label_binarizer
+                )
                 channel_probabilities += predicted_probabilities
 
             # Вычисляем разницу со средними вероятностями

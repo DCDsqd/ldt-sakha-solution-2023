@@ -2,8 +2,15 @@ import numpy as np
 
 from parser.vk_parser import VKGroup, VKLike, VKWallPost
 
+from model_predict import universal_predict
 
-def analyze_vk_groups(vk_groups: list[VKGroup], text_model, multi_label_binarizer):
+
+def analyze_vk_groups(vk_groups: list[VKGroup],
+                      text_model,
+                      multi_label_binarizer,
+                      USE_BERT,
+                      tokenizer):
+
     classes_list = multi_label_binarizer.classes_
     num_classes = len(classes_list)
     total_group_probabilities = np.zeros(num_classes)
@@ -14,7 +21,13 @@ def analyze_vk_groups(vk_groups: list[VKGroup], text_model, multi_label_binarize
 
     for group in vk_groups:
         group_text = " ".join(group.posts)  # Объединение всех постов группы в один текст
-        predicted_probabilities = text_model.predict_proba([group_text])[0]
+        _predictions_classes, predicted_probabilities = universal_predict(
+            text_model,
+            USE_BERT,
+            group_text,
+            tokenizer,
+            multi_label_binarizer
+        )
         total_group_probabilities += predicted_probabilities
         group_count += (predicted_probabilities > 0).astype(int)
         group_names.append(group.name)
@@ -25,7 +38,13 @@ def analyze_vk_groups(vk_groups: list[VKGroup], text_model, multi_label_binarize
     # Вычисляем разницу для каждой группы
     for group in vk_groups:
         group_text = " ".join(group.posts)
-        group_probabilities = text_model.predict_proba([group_text])[0]
+        _predictions_classes, group_probabilities = universal_predict(
+            text_model,
+            USE_BERT,
+            group_text,
+            tokenizer,
+            multi_label_binarizer
+        )
         diffs = np.sum(np.abs(group_probabilities - average_probabilities))
         group_diffs.append((group, diffs))
 
@@ -38,7 +57,12 @@ def analyze_vk_groups(vk_groups: list[VKGroup], text_model, multi_label_binarize
     return average_results, sorted_group_names
 
 
-def analyze_vk_likes(vk_likes: list[VKLike], text_model, multi_label_binarizer):
+def analyze_vk_likes(vk_likes: list[VKLike],
+                     text_model,
+                     multi_label_binarizer,
+                     USE_BERT,
+                     tokenizer):
+
     classes_list = multi_label_binarizer.classes_
     num_classes = len(classes_list)
     total_likes_probabilities = np.zeros(num_classes)
@@ -48,7 +72,13 @@ def analyze_vk_likes(vk_likes: list[VKLike], text_model, multi_label_binarizer):
     like_texts = []
 
     for like in vk_likes:
-        predicted_probabilities = text_model.predict_proba([like.text])[0]
+        _predictions_classes, predicted_probabilities = universal_predict(
+            text_model,
+            USE_BERT,
+            like.text,
+            tokenizer,
+            multi_label_binarizer
+        )
         total_likes_probabilities += predicted_probabilities
         likes_count += (predicted_probabilities > 0).astype(int)
         like_texts.append(like.text)
@@ -56,7 +86,13 @@ def analyze_vk_likes(vk_likes: list[VKLike], text_model, multi_label_binarizer):
     average_probabilities = total_likes_probabilities / np.maximum(likes_count, 1)
 
     for like, text in zip(vk_likes, like_texts):
-        like_probabilities = text_model.predict_proba([text])[0]
+        _predictions_classes, like_probabilities = universal_predict(
+            text_model,
+            USE_BERT,
+            text,
+            tokenizer,
+            multi_label_binarizer
+        )
         diffs = np.sum(np.abs(like_probabilities - average_probabilities))
         like_diffs.append((like, diffs))
 

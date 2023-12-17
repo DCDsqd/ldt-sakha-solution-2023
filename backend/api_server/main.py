@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import pickle
+from transformers import BertTokenizer, BertForSequenceClassification
 
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
@@ -10,9 +11,25 @@ from parser.vk_parser import init_vk_api_session, get_self_vk_data, VKLike, VKWa
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
 
+from ml.model_predict import universal_predict
+
 app = FastAPI()
-with open('models/text_model.sav', 'rb') as file:
-    text_model = pickle.load(file)
+
+# Флаг для использования BERT
+USE_BERT = False
+
+# Загрузка BERT модели и токенизатора
+if USE_BERT:
+    model_name = "DeepPavlov/rubert-base-cased"
+    tokenizer = BertTokenizer.from_pretrained(model_name)
+    bert_model = BertForSequenceClassification.from_pretrained(model_name)
+    bert_model.eval()  # Перевести модель в режим оценки
+# Загрузка LR
+else:
+    with open('models/text_model.sav', 'rb') as file:
+        text_model = pickle.load(file)
+    tokenizer = None
+
 with open('models/text_model_mlb.pkl', 'rb') as file:
     multi_label_binarizer = pickle.load(file)
 
@@ -27,17 +44,13 @@ class InputData(BaseModel):
 @app.post("/predict")
 def predict(input_data: InputData):
     if input_data.debug_text != "":
-        predicted_probabilities = text_model.predict_proba([input_data.debug_text])[0]
-
-        # Фильтруем классы и их вероятности по заданному порогу
-        threshold = 0.01
-        filtered_predictions = [(label, prob) for label, prob
-                                in zip(multi_label_binarizer.classes_, predicted_probabilities)
-                                if prob >= threshold]
-
-        # Разделяем классы и их вероятности
-        predictions_classes = [label for label, _ in filtered_predictions]
-        predictions_score = [prob for _, prob in filtered_predictions]
+        predictions_classes, predictions_score = universal_predict(
+            text_model,
+            USE_BERT,
+            input_data.debug_text,
+            tokenizer,
+            multi_label_binarizer
+        )
 
         return {
             "top_professions": predictions_classes,
@@ -61,7 +74,9 @@ def predict(input_data: InputData):
         vk_groups_average_classes_score_dict, vk_most_impactful_groups = analyze_vk_groups(
             vk_user_likes,
             text_model,
-            multi_label_binarizer
+            multi_label_binarizer,
+            USE_BERT,
+            tokenizer
         )
 
         if len(vk_most_impactful_groups) > 5:
@@ -70,7 +85,9 @@ def predict(input_data: InputData):
         vk_likes_average_classes_score_dict, vk_most_impactful_liked_posts = analyze_vk_likes(
             vk_groups,
             text_model,
-            multi_label_binarizer
+            multi_label_binarizer,
+            USE_BERT,
+            tokenizer
         )
 
         if len(vk_most_impactful_liked_posts) > 5:
@@ -104,7 +121,9 @@ def predict(input_data: InputData):
                     youtube_user_subscriptions,
                     text_model,
                     multi_label_binarizer,
-                    youtube_api_instance
+                    youtube_api_instance,
+                    USE_BERT,
+                    tokenizer
                 )
 
             if len(yt_subscriptions_most_impactful_channels) > 5:
@@ -113,7 +132,9 @@ def predict(input_data: InputData):
             yt_likes_average_classes_score_dict, yt_likes_most_impactful_videos = analyze_youtube_list_of_vids(
                 youtube_user_likes,
                 text_model,
-                multi_label_binarizer
+                multi_label_binarizer,
+                USE_BERT,
+                tokenizer
             )
 
             if len(yt_likes_most_impactful_videos) > 5:

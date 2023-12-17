@@ -137,7 +137,7 @@ Backend сервиса также поддерживает анализ Telegram
 * Для использования модели BERT необходимо загрузить её в папку `backend/api_server/models/bert/` под названием `text_model.pth`. Весь каталог `models` (или недостающие части) можно скачать с [Google диска](https://drive.google.com/drive/folders/1rSNaX_uxz2VPm_V4gTETlP-8IBbFgg_w?usp=sharing). В полном развороте каталог должен выглядеть вот так: <br> ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bebbc330-8848-4433-84ae-2afeceb282bc)
 
 **Информация для использования API напрямую (из другого сервиса):** <br>
-Структура запроса: <br>
+Структура запроса (POST): <br>
 ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bb8921e6-f518-4dc7-83ec-727c5a740769) <br>
 Стрктура ответа: <br>
 ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/0e8db23f-15c4-4c5a-938e-f797abe5622b) <br>

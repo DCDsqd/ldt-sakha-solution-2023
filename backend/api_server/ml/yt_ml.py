@@ -24,14 +24,20 @@ def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],
     for video in videos:
         concat_text = video.concatenate_text()
         concat_text = clean_text_for_model(concat_text)
-        predicted_probabilities = text_model.predict_proba([concat_text])[0]
+        _predictions_classes, predicted_probabilities = universal_predict(
+            text_model,
+            USE_BERT,
+            concat_text,
+            tokenizer,
+            multi_label_binarizer
+        )
 
         # Добавляем вероятности текущего видео в список
         video_probabilities_list.append(predicted_probabilities)
 
         # Обновляем общие вероятности и счетчик видео
         total_probabilities += predicted_probabilities
-        video_count += (predicted_probabilities > 0).astype(int)
+        video_count += (np.array(predicted_probabilities) > 0).astype(int)
 
     # Вычисляем средние вероятности для каждой категории
     average_probabilities = total_probabilities / np.maximum(video_count, 1)
@@ -73,7 +79,7 @@ def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChanne
                     multi_label_binarizer
                 )
                 total_channel_probabilities += predicted_probabilities
-                channel_count += (predicted_probabilities > 0).astype(int)
+                channel_count += (np.array(predicted_probabilities) > 0).astype(int)
 
     # Вычисляем средние вероятности
     average_probabilities = total_channel_probabilities / np.maximum(channel_count, 1)

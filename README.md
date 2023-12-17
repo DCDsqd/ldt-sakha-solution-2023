@@ -1,4 +1,4 @@
-# Решение 4 кейса ЛЦТ Якутия для Профилум
+![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/2ac2a06e-47ec-4150-983f-42a2dc8a58ca)# Решение 4 кейса ЛЦТ Якутия для Профилум
 
 
 ## Оглавление
@@ -134,10 +134,16 @@ Backend сервиса также поддерживает анализ Telegram
   * `host` - **string**, адрес хоста при инициализации приложения непосредственно путем запуска `main.py`.
   * `port` - **integer**, порт хоста при инициализации приложения непосредственно путем запуска `main.py`.
   * `db_path` - **string**, "путь" к БД PosgreSQL для кэширования API запросов. Формат: `postgresql://user:password@localhost/dbname`.
-* Для использования модели BERT необходимо загрузить её в папку `backend/api_server/models/bert/` под названием `text_model.pth`. Весь каталог `models` (или недостающие части) можно скачать с [Google диска](https://drive.google.com/drive/folders/1rSNaX_uxz2VPm_V4gTETlP-8IBbFgg_w?usp=sharing). В полном развороте каталог должен выглядеть вот так: <br> ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bebbc330-8848-4433-84ae-2afeceb282bc) 
+* Для использования модели BERT необходимо загрузить её в папку `backend/api_server/models/bert/` под названием `text_model.pth`. Весь каталог `models` (или недостающие части) можно скачать с [Google диска](https://drive.google.com/drive/folders/1rSNaX_uxz2VPm_V4gTETlP-8IBbFgg_w?usp=sharing). В полном развороте каталог должен выглядеть вот так: <br> ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bebbc330-8848-4433-84ae-2afeceb282bc)
 
+**Информация для использования API напрямую (из другого сервиса):** <br>
+Структура запроса: <br>
+![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bb8921e6-f518-4dc7-83ec-727c5a740769) <br>
+Стрктура ответа: <br>
+![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/0e8db23f-15c4-4c5a-938e-f797abe5622b) <br>
 
  **Для Web-сервиса:**
+ 
 
 ## Запуск сервисов <br>
 **Для ML-сервиса**: Из папки ```backend/api_server``` запустите ```python main.py```, чтобы запустить сервис с конфигурацией из конфига, либо можно указать `host` и `port` напрямую, выполнив `uvicorn main:app --host [host] --port [port]`.

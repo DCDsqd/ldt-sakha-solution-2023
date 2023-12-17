@@ -4,6 +4,7 @@ from nltk.tokenize import word_tokenize
 import nltk
 
 nltk.download('stopwords', quiet=True)
+nltk.download('punkt')
 
 # Списки стоп-слов для русского и английского языков
 russian_stopwords = set(stopwords.words('russian'))

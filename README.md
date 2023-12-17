@@ -44,6 +44,8 @@
   * `host` - **string**, адрес хоста при инициализации приложения непосредственно путем запуска `main.py`.
   * `port` - **integer**, порт хоста при инициализации приложения непосредственно путем запуска `main.py`.
   * `db_path` - **string**, "путь" к БД PosgreSQL для кэширования API запросов. Формат: `postgresql://user:password@localhost/dbname`.
+* Для использования модели BERT необходимо загрузить её в папку `backend/api_server/models/bert/` под названием `text_model.pth`. Весь каталог `models` (или недостающие части) можно скачать с [Google диска](https://drive.google.com/drive/folders/1rSNaX_uxz2VPm_V4gTETlP-8IBbFgg_w?usp=sharing). В полном развороте каталог должен выглядеть вот так: <br> ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bebbc330-8848-4433-84ae-2afeceb282bc) 
+
 
  **Для Web-сервиса:**
 

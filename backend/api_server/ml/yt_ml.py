@@ -47,7 +47,7 @@ def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],
 def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChannel],
                                        text_model,
                                        multi_label_binarizer,
-                                       youtube_api_instance) -> (dict, list):
+                                       youtube_api_instance) -> (dict, list[YTChannel]):
     classes_list = multi_label_binarizer.classes_
     num_classes = len(classes_list)
     total_channel_probabilities = np.zeros(num_classes)
@@ -68,7 +68,7 @@ def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChanne
     average_probabilities = total_channel_probabilities / np.maximum(channel_count, 1)
 
     channel_diffs = np.array([])
-    channel_names = []
+    channels = []
 
     # Теперь вычисляем разницы для каждого канала
     for youtube_user_subbed_channel in youtube_user_subscriptions:
@@ -89,10 +89,10 @@ def analyze_youtube_user_subscriptions(youtube_user_subscriptions: list[YTChanne
             diffs = np.inf
 
         channel_diffs = np.append(channel_diffs, diffs)
-        channel_names.append(youtube_user_subbed_channel.title)
+        channels.append(youtube_user_subbed_channel)
 
     # Сортировка индексов каналов на основе их различий
     sorted_indices = np.argsort(channel_diffs)
-    sorted_channels = [channel_names[i] for i in sorted_indices]
+    sorted_channels = [channels[i] for i in sorted_indices]
 
     return dict(zip(classes_list, average_probabilities)), sorted_channels

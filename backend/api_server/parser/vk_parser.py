@@ -124,6 +124,16 @@ def get_vk_data(vk, vk_user_id):
     return groups, wall, likes
 
 
+def get_vk_user_id(vk_session):
+    try:
+        vk = vk_session.get_api()
+        response = vk.users.get()
+        user_id = response[0]['id']
+        return user_id
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Debug function
 def format_vk_output(group_info, group_posts):
     output = ""

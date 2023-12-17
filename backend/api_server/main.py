@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo, get_youtube_channel_id
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
-from parser.vk_parser import init_vk_api_session, get_self_vk_data, VKLike, VKWallPost, VKGroup
+from parser.vk_parser import init_vk_api_session, get_self_vk_data, VKLike, VKWallPost, VKGroup, get_vk_user_id
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
 from ml.tg_ml import analyze_tg_list_of_texts
@@ -81,34 +81,43 @@ def predict(input_data: InputData, db: Session = Depends(get_db)):
     vk_most_impactful_groups = None
     if input_data.vk_token != "":
         vk = init_vk_api_session(input_data.vk_token)
-        vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
-        vk_groups_average_classes_score_dict, vk_most_impactful_groups = analyze_vk_groups(
-            vk_user_likes,
-            text_model,
-            multi_label_binarizer,
-            USE_BERT,
-            tokenizer
-        )
+        vk_self_id = get_vk_user_id(vk)
 
-        if len(vk_most_impactful_groups) > 5:
-            vk_most_impactful_groups = vk_most_impactful_groups[:5]
+        vk_cached_res = vk_get_by_id(db, vk_self_id)
+        if vk_cached_res is not None:
+            vk_sum_dict = vk_cached_res
+        else:
+            vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
-        vk_likes_average_classes_score_dict, vk_most_impactful_liked_posts = analyze_vk_likes(
-            vk_groups,
-            text_model,
-            multi_label_binarizer,
-            USE_BERT,
-            tokenizer
-        )
+            vk_groups_average_classes_score_dict, vk_most_impactful_groups = analyze_vk_groups(
+                vk_user_likes,
+                text_model,
+                multi_label_binarizer,
+                USE_BERT,
+                tokenizer
+            )
 
-        if len(vk_most_impactful_liked_posts) > 5:
-            vk_most_impactful_liked_posts = vk_most_impactful_liked_posts[:5]
+            if len(vk_most_impactful_groups) > 5:
+                vk_most_impactful_groups = vk_most_impactful_groups[:5]
 
-        vk_sum_dict = merge_and_average_dicts(vk_likes_average_classes_score_dict,
-                                              vk_groups_average_classes_score_dict,
-                                              weight1=1,
-                                              weight2=3)
+            vk_likes_average_classes_score_dict, vk_most_impactful_liked_posts = analyze_vk_likes(
+                vk_groups,
+                text_model,
+                multi_label_binarizer,
+                USE_BERT,
+                tokenizer
+            )
+
+            if len(vk_most_impactful_liked_posts) > 5:
+                vk_most_impactful_liked_posts = vk_most_impactful_liked_posts[:5]
+
+            vk_sum_dict = merge_and_average_dicts(vk_likes_average_classes_score_dict,
+                                                  vk_groups_average_classes_score_dict,
+                                                  weight1=1,
+                                                  weight2=3)
+
+            vk_save_data_to_db(db, vk_self_id, vk_sum_dict)
 
     # YouTube section
     yt_sum_dict = None

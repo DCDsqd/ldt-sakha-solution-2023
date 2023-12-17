@@ -86,6 +86,13 @@ class YTVideoInfo:
         """
         return f"Video title: {self.title}\nDescription: {self.desc}\nCategory: {self.category}"
 
+    def to_json(self):
+        """Преобразование объекта видео в JSON-подобный словарь."""
+        return {
+            "name": self.title,
+            "id": self.yt_video_id
+        }
+
     def concatenate_text(self, include_category: bool = False) -> str:
         return " ".join([self.title, self.desc]) if include_category else \
                " ".join([self.title, self.desc, self.category])
@@ -104,6 +111,13 @@ class YTChannel:
         including its ID, title, and description.
         """
         return f"Channel ID: {self.yt_id}\nTitle: {self.title}\nDescription: {self.desc}"
+
+    def to_json(self):
+        """Преобразование объекта канал в JSON-подобный словарь."""
+        return {
+            "name": self.title,
+            "id": self.yt_id
+        }
 
     def gather_videos(self, youtube_api, max_results=10) -> list[YTVideoInfo]:
         # print(f"Analyzing videos for channel ID: {self.yt_id}")

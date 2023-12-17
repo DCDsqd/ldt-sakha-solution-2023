@@ -19,6 +19,14 @@ class VKGroup:
         self.members_count = members_count
         self.posts = posts  # Список последних 50 постов (только текст)
 
+    def to_json(self):
+        """Преобразование объекта группа в JSON-подобный словарь."""
+        return {
+            "name": self.name,
+            "id": self.vk_id,
+            "subs": self.members_count
+        }
+
 
 class VKWallPost:
     def __init__(self, post_id, owner_id, text):
@@ -32,6 +40,13 @@ class VKLike:
         self.item_id = item_id  # ID поста, которому пользователь поставил лайк
         self.owner_id = owner_id  # ID владельца поста
         self.text = text  # Текст поста
+
+    def to_json(self):
+        """Преобразование объекта канал в JSON-подобный словарь."""
+        return {
+            "name": self.title,
+            "id": self.yt_id
+        }
 
 
 def get_group_data(vk, group_id):

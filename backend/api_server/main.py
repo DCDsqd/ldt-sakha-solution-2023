@@ -9,7 +9,7 @@ from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscript
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 from parser.vk_parser import init_vk_api_session, get_self_vk_data
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
-from ml.helpers import load_sklearn_model
+from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values
 
 
 app = FastAPI()
@@ -53,19 +53,31 @@ def predict(input_data: InputData):
     vk = init_vk_api_session(input_data.vk_token)
     vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
-    vk_groups_average_classes_score_dict = analyze_vk_groups(
+    vk_groups_average_classes_score_dict, vk_most_impactful_groups = analyze_vk_groups(
         vk_user_likes,
         text_model,
         multi_label_binarizer
     )
 
-    vk_likes_average_classes_score_dict = analyze_vk_likes(
+    if len(vk_most_impactful_groups) > 5:
+        vk_most_impactful_groups = vk_most_impactful_groups[:5]
+
+    vk_likes_average_classes_score_dict, vk_most_impactful_posts = analyze_vk_likes(
         vk_groups,
         text_model,
         multi_label_binarizer
     )
 
+    if len(vk_most_impactful_posts) > 5:
+        vk_most_impactful_posts = vk_most_impactful_posts[:5]
+
+    vk_sum_dict = merge_and_average_dicts(vk_likes_average_classes_score_dict,
+                                          vk_groups_average_classes_score_dict,
+                                          weight1=3,
+                                          weight2=2)
+
     # YouTube section
+    yt_sum_dict = None
     if input_data.yt_token != "" and input_data.yt_token is not None:
         try:
             # Initialize YT API
@@ -78,17 +90,20 @@ def predict(input_data: InputData):
             youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
             youtube_user_likes: list[YTVideoInfo] = get_user_liked_videos(youtube_api_instance)
 
-            yt_subscriptions_average_classes_score_dict, subscriptions_most_impactful_channels = \
+            yt_subscriptions_average_classes_score_dict, yt_subscriptions_most_impactful_channels = \
                 analyze_youtube_user_subscriptions(
                     youtube_user_subscriptions,
                     text_model,
                     multi_label_binarizer
                 )
-            yt_likes_average_classes_score_dict, likes_most_impactful_videos = analyze_youtube_list_of_vids(
+            yt_likes_average_classes_score_dict, yt_likes_most_impactful_videos = analyze_youtube_list_of_vids(
                 youtube_user_likes,
                 text_model,
                 multi_label_binarizer
             )
+
+            yt_sum_dict = merge_and_average_dicts(yt_subscriptions_average_classes_score_dict,
+                                                  yt_likes_average_classes_score_dict)
 
         except Exception as e:
             print(e)
@@ -96,9 +111,15 @@ def predict(input_data: InputData):
         # Do not raise an exception for now (yt api quota lack might cause this, we don't want to terminate cause of it)
         # raise HTTPException(status_code=500, detail=str(e))
 
+    final_dict = vk_sum_dict
+    if yt_sum_dict:
+        final_dict = merge_and_average_dicts(final_dict, yt_sum_dict)
+
+    top_profs, top_probs = split_dict_into_labels_and_values(final_dict)
+
     return {
-        "predictions_score": average_results,
-        "predictions_classes": classes_list,
+        "top_professions": top_profs,
+        "top_probabilities": top_probs,
     }
 
 

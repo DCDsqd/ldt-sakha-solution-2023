@@ -40,8 +40,12 @@ def predict(input_data: InputData):
         predictions_score = [prob for _, prob in filtered_predictions]
 
         return {
-            "predictions_score": predictions_score,
-            "predictions_classes": predictions_classes,
+            "top_professions": predictions_classes,
+            "top_probabilities": predictions_score,
+            "yt_impactful_likes": [],
+            "yt_impactful_channels": [],
+            "vk_impactful_likes": [],
+            "vk_impactful_groups": []
         }
 
     # VK section

@@ -1,3 +1,4 @@
+import torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
@@ -10,19 +11,20 @@ from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of
 from parser.vk_parser import init_vk_api_session, get_self_vk_data, VKLike, VKWallPost, VKGroup
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
-
-from ml.model_predict import universal_predict
+from ml.tg_ml import analyze_tg_list_of_texts
 
 app = FastAPI()
 
 # Флаг для использования BERT
 USE_BERT = False
+NUM_LABLES = 100
 
 # Загрузка BERT модели и токенизатора
 if USE_BERT:
     model_name = "DeepPavlov/rubert-base-cased"
     tokenizer = BertTokenizer.from_pretrained(model_name)
-    bert_model = BertForSequenceClassification.from_pretrained(model_name)
+    bert_model = BertForSequenceClassification.from_pretrained(model_name, num_labels=NUM_LABLES)
+    bert_model.load_state_dict(torch.load('models/bert/text_model.pth'))
     bert_model.eval()  # Перевести модель в режим оценки
 # Загрузка LR
 else:
@@ -38,30 +40,28 @@ with open('models/text_model_mlb.pkl', 'rb') as file:
 class InputData(BaseModel):
     yt_token: str
     vk_token: str
-    debug_text: str
+    tg_posts: list[str]
 
 
 @app.post("/predict")
 def predict(input_data: InputData):
-    if input_data.debug_text != "":
-        predictions_classes, predictions_score = universal_predict(
-            text_model,
-            USE_BERT,
-            input_data.debug_text,
-            tokenizer,
-            multi_label_binarizer
-        )
-
-        return {
-            "top_professions": predictions_classes,
-            "top_probabilities": predictions_score,
-            "yt_impactful_likes": [YTVideoInfo("sdddd", "asasss", "ass", "sssssss2f32f").to_json()],
-            "yt_impactful_channels": [YTChannel("id", "adlks", "asasa").to_json()],
-            "vk_impactful_likes": [VKLike(1, 1, "adsd").to_json()],
-            "vk_impactful_groups": [VKGroup(1, "dafsf", "dfsf", 2222, "as").to_json()]
-        }
-
-    print(input_data.yt_token)
+    #if input_data.debug_text != "":
+    #    predictions_classes, predictions_score = universal_predict(
+    #        text_model,
+    #        USE_BERT,
+    #        input_data.debug_text,
+    #        tokenizer,
+    #        multi_label_binarizer
+    #    )
+#
+    #    return {
+    #        "top_professions": predictions_classes,
+    #        "top_probabilities": predictions_score,
+    #        "yt_impactful_likes": [YTVideoInfo("sdddd", "asasss", "ass", "sssssss2f32f").to_json()],
+    #        "yt_impactful_channels": [YTChannel("id", "adlks", "asasa").to_json()],
+    #        "vk_impactful_likes": [VKLike(1, 1, "adsd").to_json()],
+    #        "vk_impactful_groups": [VKGroup(1, "dafsf", "dfsf", 2222, "as").to_json()]
+    #    }
 
     # VK section
     vk_sum_dict = None
@@ -151,7 +151,17 @@ def predict(input_data: InputData):
         # Do not raise an exception for now (yt api quota lack might cause this, we don't want to terminate cause of it)
         # raise HTTPException(status_code=500, detail=str(e))
 
-    dicts_list = [vk_sum_dict, yt_sum_dict]
+    tg_sum_dict = None
+    if input_data.tg_posts:
+        tg_sum_dict = analyze_tg_list_of_texts(
+            input_data.tg_posts,
+            text_model,
+            multi_label_binarizer,
+            USE_BERT,
+            tokenizer
+        )
+
+    dicts_list = [vk_sum_dict, yt_sum_dict, tg_sum_dict]
     dicts_list = [dict_ for dict_ in dicts_list if dict_ is not None]
 
     final_dict = merge_and_average_multiple_dicts(dicts_list, [1] * len(dicts_list))

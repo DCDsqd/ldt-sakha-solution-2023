@@ -8,7 +8,7 @@ from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscript
 from ml.yt_ml import analyze_youtube_user_subscriptions, analyze_youtube_list_of_vids
 from parser.vk_parser import init_vk_api_session, get_self_vk_data
 from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
-from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values
+from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
 
 app = FastAPI()
 with open('models/text_model.sav', 'rb') as file:
@@ -45,34 +45,35 @@ def predict(input_data: InputData):
         }
 
     # VK section
-    if input_data.vk_token is None or input_data.vk_token == "":
-        print('NO VK TOKEN PROVIDED! Should never happen!')
+    vk_sum_dict = None
+    vk_most_impactful_liked_posts = None
+    vk_most_impactful_groups = None
+    if input_data.vk_token != "" and input_data.vk_token is not None:
+        vk = init_vk_api_session(input_data.vk_token)
+        vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
-    vk = init_vk_api_session(input_data.vk_token)
-    vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
+        vk_groups_average_classes_score_dict, vk_most_impactful_groups = analyze_vk_groups(
+            vk_user_likes,
+            text_model,
+            multi_label_binarizer
+        )
 
-    vk_groups_average_classes_score_dict, vk_most_impactful_groups = analyze_vk_groups(
-        vk_user_likes,
-        text_model,
-        multi_label_binarizer
-    )
+        if len(vk_most_impactful_groups) > 5:
+            vk_most_impactful_groups = vk_most_impactful_groups[:5]
 
-    if len(vk_most_impactful_groups) > 5:
-        vk_most_impactful_groups = vk_most_impactful_groups[:5]
+        vk_likes_average_classes_score_dict, vk_most_impactful_liked_posts = analyze_vk_likes(
+            vk_groups,
+            text_model,
+            multi_label_binarizer
+        )
 
-    vk_likes_average_classes_score_dict, vk_most_impactful_liked_posts = analyze_vk_likes(
-        vk_groups,
-        text_model,
-        multi_label_binarizer
-    )
+        if len(vk_most_impactful_liked_posts) > 5:
+            vk_most_impactful_liked_posts = vk_most_impactful_liked_posts[:5]
 
-    if len(vk_most_impactful_liked_posts) > 5:
-        vk_most_impactful_liked_posts = vk_most_impactful_liked_posts[:5]
-
-    vk_sum_dict = merge_and_average_dicts(vk_likes_average_classes_score_dict,
-                                          vk_groups_average_classes_score_dict,
-                                          weight1=1,
-                                          weight2=3)
+        vk_sum_dict = merge_and_average_dicts(vk_likes_average_classes_score_dict,
+                                              vk_groups_average_classes_score_dict,
+                                              weight1=1,
+                                              weight2=3)
 
     # YouTube section
     yt_sum_dict = None
@@ -120,21 +121,26 @@ def predict(input_data: InputData):
         # Do not raise an exception for now (yt api quota lack might cause this, we don't want to terminate cause of it)
         # raise HTTPException(status_code=500, detail=str(e))
 
-    final_dict = vk_sum_dict
+    dicts_list = [vk_sum_dict, yt_sum_dict]
+    dicts_list = [dict_ for dict_ in dicts_list if dict_ is not None]
+
+    final_dict = merge_and_average_multiple_dicts(dicts_list, [1] * len(dicts_list))
+
     yt_likes_most_impactful_videos_json = None
     yt_subscriptions_most_impactful_channels_json = None
     if yt_sum_dict:
-        final_dict = merge_and_average_dicts(final_dict, yt_sum_dict)
-
         yt_likes_most_impactful_videos_json = [video.to_json() for video
                                                in yt_likes_most_impactful_videos]
         yt_subscriptions_most_impactful_channels_json = [video.to_json() for video
                                                          in yt_subscriptions_most_impactful_channels]
 
-    vk_most_impactful_liked_posts_json = [video.to_json() for video
-                                    in vk_most_impactful_liked_posts]
-    vk_most_impactful_groups_json = [video.to_json() for video
-                                     in vk_most_impactful_groups]
+    vk_most_impactful_liked_posts_json = None
+    vk_most_impactful_groups_json = None
+    if vk_sum_dict:
+        vk_most_impactful_liked_posts_json = [video.to_json() for video
+                                              in vk_most_impactful_liked_posts]
+        vk_most_impactful_groups_json = [video.to_json() for video
+                                         in vk_most_impactful_groups]
 
     top_profs, top_probs = split_dict_into_labels_and_values(final_dict)
 

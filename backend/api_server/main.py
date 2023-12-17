@@ -1,9 +1,10 @@
 import torch
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 import uvicorn
 import pickle
 from transformers import BertTokenizer, BertForSequenceClassification
+import json
 
 from parser.yt_parser import init_youtube_with_user_token, get_user_yt_subscriptions, get_user_liked_videos, \
     YTChannel, YTVideoInfo
@@ -13,10 +14,13 @@ from ml.vk_ml import analyze_vk_groups, analyze_vk_likes
 from tools.tools import merge_and_average_dicts, split_dict_into_labels_and_values, merge_and_average_multiple_dicts
 from ml.tg_ml import analyze_tg_list_of_texts
 
+with open('cfg.json', 'r', encoding='utf-8') as f:
+    cfg = json.load(f)
+
 app = FastAPI()
 
 # Флаг для использования BERT
-USE_BERT = False
+USE_BERT = cfg['use_bert']
 NUM_LABLES = 100
 
 # Загрузка BERT модели и токенизатора
@@ -45,24 +49,6 @@ class InputData(BaseModel):
 
 @app.post("/predict")
 def predict(input_data: InputData):
-    #if input_data.debug_text != "":
-    #    predictions_classes, predictions_score = universal_predict(
-    #        text_model,
-    #        USE_BERT,
-    #        input_data.debug_text,
-    #        tokenizer,
-    #        multi_label_binarizer
-    #    )
-#
-    #    return {
-    #        "top_professions": predictions_classes,
-    #        "top_probabilities": predictions_score,
-    #        "yt_impactful_likes": [YTVideoInfo("sdddd", "asasss", "ass", "sssssss2f32f").to_json()],
-    #        "yt_impactful_channels": [YTChannel("id", "adlks", "asasa").to_json()],
-    #        "vk_impactful_likes": [VKLike(1, 1, "adsd").to_json()],
-    #        "vk_impactful_groups": [VKGroup(1, "dafsf", "dfsf", 2222, "as").to_json()]
-    #    }
-
     # VK section
     vk_sum_dict = None
     vk_most_impactful_liked_posts = None
@@ -199,4 +185,4 @@ def predict(input_data: InputData):
 # При запуске с помощью Uvicorn, этот блок не требуется.
 # Если вы запускаете файл напрямую, он позволяет запустить сервер.
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8090)
+    uvicorn.run(app, host=cfg['host'], port=cfg['port'])

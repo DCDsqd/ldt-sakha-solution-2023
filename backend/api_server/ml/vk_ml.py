@@ -2,7 +2,7 @@ import numpy as np
 
 from parser.vk_parser import VKGroup, VKLike, VKWallPost
 
-from model_predict import universal_predict
+from ml.model_predict import universal_predict
 
 
 def analyze_vk_groups(vk_groups: list[VKGroup],

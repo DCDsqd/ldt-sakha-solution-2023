@@ -2,7 +2,7 @@ import numpy as np
 
 from parser.common import clean_text_for_model
 from parser.yt_parser import YTChannel, YTVideoInfo
-from model_predict import universal_predict
+from ml.model_predict import universal_predict
 
 
 def analyze_youtube_list_of_vids(videos: list[YTVideoInfo],

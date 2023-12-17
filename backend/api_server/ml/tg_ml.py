@@ -1,6 +1,6 @@
 import numpy as np
 
-from model_predict import universal_predict
+from ml.model_predict import universal_predict
 
 
 def analyze_tg_list_of_texts(texts: list[str],

@@ -43,7 +43,7 @@ public class ResultController {
             return "main";
         }
 
-        Predict data = apiRequestService.sendTestRequest();
+        Predict data = apiRequestService.sendUserRequest(principal);
         List<Course> courses = courseService.findAllByName(data.getProfession());
         List<Map<String, Double>> pairs = apiRequestService.getPairs(data.getTopProbabilities(), data.getTopProfessions());
 

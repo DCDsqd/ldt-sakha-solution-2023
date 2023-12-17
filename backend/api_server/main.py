@@ -48,11 +48,13 @@ def predict(input_data: InputData):
             "vk_impactful_groups": [VKGroup(1, "dafsf", "dfsf", 2222, "as").to_json()]
         }
 
+    print(input_data.yt_token)
+
     # VK section
     vk_sum_dict = None
     vk_most_impactful_liked_posts = None
     vk_most_impactful_groups = None
-    if input_data.vk_token != "" and input_data.vk_token is not None:
+    if input_data.vk_token != "":
         vk = init_vk_api_session(input_data.vk_token)
         vk_groups, vk_wall, vk_user_likes = get_self_vk_data(vk)
 
@@ -83,13 +85,15 @@ def predict(input_data: InputData):
     yt_sum_dict = None
     yt_likes_most_impactful_videos = None
     yt_subscriptions_most_impactful_channels = None
-    if input_data.yt_token != "" and input_data.yt_token is not None:
+    if input_data.yt_token != "":
         try:
             # Initialize YT API
             youtube_api_instance = init_youtube_with_user_token(
                 input_data.yt_token,
                 'secrets/google_project_secret.apps.googleusercontent.com.json'  # Path to Google App Credentials
             )
+
+            print("inited yt", type(youtube_api_instance))
 
             # Get list of user subscriptions
             youtube_user_subscriptions: list[YTChannel] = get_user_yt_subscriptions(youtube_api_instance)
@@ -99,7 +103,8 @@ def predict(input_data: InputData):
                 analyze_youtube_user_subscriptions(
                     youtube_user_subscriptions,
                     text_model,
-                    multi_label_binarizer
+                    multi_label_binarizer,
+                    youtube_api_instance
                 )
 
             if len(yt_subscriptions_most_impactful_channels) > 5:

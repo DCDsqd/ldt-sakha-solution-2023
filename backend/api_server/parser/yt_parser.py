@@ -7,14 +7,15 @@ import json
 
 
 def init_youtube_with_user_token(token, client_secrets_file_path, refresh_token=None):
+    # print("init yt")
     api_service_name = "youtube"
     api_version = "v3"
 
     # Чтение client_id и client_secret из файла с секретами клиента
     with open(client_secrets_file_path, 'r') as file:
         secrets_data = json.load(file)
-        client_id = secrets_data['installed']['client_id']
-        client_secret = secrets_data['installed']['client_secret']
+        client_id = secrets_data['web']['client_id']
+        client_secret = secrets_data['web']['client_secret']
 
     credentials = Credentials(
         token=token,
@@ -24,6 +25,9 @@ def init_youtube_with_user_token(token, client_secrets_file_path, refresh_token=
         client_secret=client_secret
     )
 
+    # print(credentials.token, credentials.refresh_token, credentials.token_uri, credentials.client_secret,
+    # credentials.client_id)
+
     try:
         youtube = googleapiclient.discovery.build(
             api_service_name, api_version, credentials=credentials
@@ -31,6 +35,8 @@ def init_youtube_with_user_token(token, client_secrets_file_path, refresh_token=
     except Exception as e:
         print(f"Error during YouTube client initialization: {e}")
         return None
+
+    print("yt init successful", youtube)
 
     return youtube
 
@@ -122,46 +128,58 @@ class YTChannel:
     def gather_videos(self, youtube_api, max_results=10) -> list[YTVideoInfo]:
         # print(f"Analyzing videos for channel ID: {self.yt_id}")
 
-        category_map = get_yt_category_map(youtube_api)
+        # category_map = get_yt_category_map(youtube_api)
 
-        # First, get the channel's upload playlist ID
-        channel_request = youtube_api.channels().list(
-            part="contentDetails",
-            id=self.yt_id  # Use forUsername=username if you have the username instead of the channel ID
-        )
-        channel_response = channel_request.execute()
+        try:
+            # First, get the channel's upload playlist ID
+            channel_request = youtube_api.channels().list(
+                part="contentDetails",
+                id=self.yt_id  # Use forUsername=username if you have the username instead of the channel ID
+            )
+            channel_response = channel_request.execute()
 
-        upload_playlist_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+            upload_playlist_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
-        # Fetch the videos from the upload playlist
-        playlist_request = youtube_api.playlistItems().list(
-            part="contentDetails",
-            playlistId=upload_playlist_id,
-            maxResults=max_results
-        )
-        playlist_response = playlist_request.execute()
+            # print("PlaylistId before getting channel's vids")
 
-        video_ids = [item['contentDetails']['videoId'] for item in playlist_response.get('items', [])]
+            # Fetch the videos from the upload playlist
+            playlist_request = youtube_api.playlistItems().list(
+                part="contentDetails",
+                playlistId=upload_playlist_id,
+                maxResults=max_results
+            )
+            playlist_response = playlist_request.execute()
 
-        # Batch request for video details
-        video_request = youtube_api.videos().list(
-            part="snippet",
-            id=','.join(video_ids)  # Join video IDs with commas for batch request
-        )
-        video_response = video_request.execute()
+            video_ids = [item['contentDetails']['videoId'] for item in playlist_response.get('items', [])]
 
-        # Process each video
-        video_data = []
-        for video in video_response.get('items', []):
-            title = video['snippet']['title']
-            description = video['snippet']['description']
-            category_id = video['snippet']['categoryId']
-            category = category_map.get(category_id, "Unknown")
-            video_id = video['id']
+            # Batch request for video details
+            video_request = youtube_api.videos().list(
+                part="snippet",
+                id=','.join(video_ids)  # Join video IDs with commas for batch request
+            )
+            video_response = video_request.execute()
 
-            video_data.append(YTVideoInfo(title, description, category, video_id))
+            # Process each video
+            video_data = []
+            for video in video_response.get('items', []):
+                title = video['snippet']['title']
+                description = video['snippet']['description']
+                category_id = video['snippet']['categoryId']
+                # category = category_map.get(category_id, "Unknown")
+                video_id = video['id']
 
-        return video_data
+                video_data.append(YTVideoInfo(title, description, "Unknown", video_id))
+
+            return video_data
+
+        except googleapiclient.errors.HttpError as http_e:
+            if http_e.resp.status == 404:
+                print("Playlist not found.")
+                return []
+            else:
+                # Для других HTTP ошибок можно вывести сообщение или обработать по-другому
+                print(f"An HTTP error occurred: {http_e}")
+                return []
 
 
 def get_user_liked_videos(youtube, max_results=100) -> list[YTVideoInfo]:
@@ -172,6 +190,8 @@ def get_user_liked_videos(youtube, max_results=100) -> list[YTVideoInfo]:
     ).execute()
 
     liked_videos_playlist_id = channels_response['items'][0]['contentDetails']['relatedPlaylists']['likes']
+
+    # print("PlaylistId before getting liked vids")
 
     # Получаем видео из плейлиста лайкнутых видео
     playlist_request = youtube.playlistItems().list(
@@ -205,7 +225,7 @@ def get_user_liked_videos(youtube, max_results=100) -> list[YTVideoInfo]:
     return liked_videos
 
 
-def get_user_yt_subscriptions(youtube, limit=100) -> list[YTChannel]:
+def get_user_yt_subscriptions(youtube, limit=150) -> list[YTChannel]:
     def get_subscriptions(page_token=None):
         return youtube.subscriptions().list(
             part="snippet",
@@ -223,6 +243,9 @@ def get_user_yt_subscriptions(youtube, limit=100) -> list[YTChannel]:
     while 'nextPageToken' in subscriptions:
         subscriptions = get_subscriptions(subscriptions['nextPageToken'])
         all_subscriptions.extend(subscriptions.get('items', []))
+
+        if limit <= len(all_subscriptions):
+            break
 
     # file_path = 'latest_youtube_subscriptions_answer.json'
     # with open(file_path, 'w', encoding='utf-8') as file:

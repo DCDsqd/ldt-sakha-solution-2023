@@ -1,0 +1,30 @@
+spring:
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: 8e323ced3f1dd707f33a
+            clientSecret: dcc37505ed4012c5dc810c8baeea8cad574f3522
+          google:
+            client-id: 388410756179-8geald8f2og9k3b3op7ndkvfd375u8vk.apps.googleusercontent.com
+            client-secret: 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
+          vk:
+            client-id: 51814557
+            client-secret: XR7QUPBH9mnnDWpUOKcp
+#            userAuthorizationUri: https://oauth.vk.com/authorize
+#            client-authentication-method: post
+#            authorization-grant-type: authorization_code
+#            tokenName: code
+#            authenticationScheme: query
+#            grant-type: authorization_code
+        provider:
+          vk:
+#            authorization-uri: https://oauth.vk.com/authorize
+#            token-uri: https://oauth.vk.com/access_token
+#            user-info-uri: https://api.vk.com/method/users.get
+            user-name-attribute: first_name
+          google:
+            user-name-attribute: name

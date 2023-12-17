@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from db_models import YtTable, VkTable, TgTable
+from db.db_models import YtTable, VkTable, TgTable
 
 
 def yt_save_data_to_db(db: Session, id_value: str, json_value: dict):

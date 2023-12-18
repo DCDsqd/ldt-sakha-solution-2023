@@ -135,6 +135,8 @@ Backend сервиса также поддерживает анализ Telegram
   * `port` - **integer**, порт хоста при инициализации приложения непосредственно путем запуска `main.py`.
   * `db_path` - **string**, "путь" к БД PosgreSQL для кэширования API запросов. Формат: `postgresql://user:password@localhost/dbname`.
 * Для использования модели BERT необходимо загрузить её в папку `backend/api_server/models/bert/` под названием `text_model.pth`. Весь каталог `models` (или недостающие части) можно скачать с [Google диска](https://drive.google.com/drive/folders/1rSNaX_uxz2VPm_V4gTETlP-8IBbFgg_w?usp=sharing). В полном развороте каталог должен выглядеть вот так: <br> ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/bebbc330-8848-4433-84ae-2afeceb282bc)
+* Из папки ```backend/api_server``` запустите ```python main.py```, чтобы запустить сервис с конфигурацией из конфига, либо можно указать `host` и `port` напрямую, выполнив `uvicorn main:app --host [host] --port [port]`.
+**NOTE:** Рекомендуем использовать `python 3.10.*`. Если `pip install -r requirements.txt` не работает, попробуйте устанавливать пакеты по отдельности.
 
 **Информация для использования API напрямую (из другого сервиса):** <br>
 Структура запроса (POST): <br>
@@ -143,18 +145,41 @@ Backend сервиса также поддерживает анализ Telegram
 ![image](https://github.com/DCDsqd/ldt-sakha-solution-2023/assets/89082426/0e8db23f-15c4-4c5a-938e-f797abe5622b) <br>
 
  **Для Web-сервиса:**
+ * Поднять и настроить `ngnix` на сервере:
+   * `sudo apt install nginx`
+   * `sudo ufw allow 'Nginx Full'`
+   * `systemctl status nginx`
+   * Настроить файл `/etc/nginx/sites-available/example.com` (example.com - Ваш хост):
+     * ```
+       server {
+           server_name 
+           example.com;
+           index index.html index.htm;
+           access_log /var/log/nginx/example.log;
+           error_log  /var/log/nginx/example-error.log error;
+           location / {
+               proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+               proxy_set_header X-Forwarded-Proto $scheme;
+               proxy_set_header X-Real-IP $remote_addr;
+               proxy_set_header Host $http_host;
+               proxy_pass http://127.0.0.1:8070/;
+               proxy_redirect off;
+           }
+       } 
+       ```
+    * `sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/example.com`
+    * [Убрать таймаут запросов в конфиге nginx](https://itshaman.ru/articles/1856/kak-otklyuchit-timeout-v-nginx)
+    * Настроить переадрессации для Ваших нужд, например, на какой-нибудь домен
+ * Скачать `*.jar` билд [здесь](https://drive.google.com/file/d/1HfsYqrrGVfby4fNsWwvsAaW-xJySXvln/view?usp=sharing) - стабильный билд, но без возможности удобно изменять конфиги :( <br>
+   Либо [здесь](https://drive.google.com/drive/folders/1oY_vrT9c1wOrCOrrmZDdzhlyAflliiX1?usp=sharing) - билд с конфигами наружу <br>
+   Либо соберите свой build из source кода <br>
+ * Билд затем нужно поместить в папку `web/fatum/res` и выполнить `nohup java -jar demo-0.0.1-SNAPSHOT.jar > log.txt &` для запуска
  
-
-## Запуск сервисов <br>
-**Для ML-сервиса**: Из папки ```backend/api_server``` запустите ```python main.py```, чтобы запустить сервис с конфигурацией из конфига, либо можно указать `host` и `port` напрямую, выполнив `uvicorn main:app --host [host] --port [port]`.
-
-
-
 # ВАЖНО
 К сожалению, VK и Google в целях безопасности не позволяют непроверенным приложениям получать доступ ко многим данным пользователя. Поэтому, до верификации этих приложений VK API работать не будет вообще, а Google будет работать только для тех пользователей, которые числятся как тестировщики (см. **Регистрация и настройка приложения в Google Cloud API & Services**, либо попросите нас добавить нужные вам аккаунты как тестировщиров) <br>
 Другого обходного легального пути для получения данных из этих сервисов нет. <br>
 ### **Приложения, через которые работает сервис, запущенный на хосте для демонстрации на момент дедлайна НЕ ВЕРИФИЦИРОВАНЫ -> функционал серъезно ограничен!** <br>
-### **Если у вас не работает авторизация или некоторые запросы - дело в этом!** <br>
+### **Если у вас не работает авторизация или некоторые запросы возвращаются пустыми - дело в этом!** <br>
 Мы оставили заявки на верификацию наших приложений, но так и не дождались её :(
 
 **Ещё одно важное замечание по поводу квоты YouTube API:** Для неверефицированного приложения квота - 10000 токенов в день. На обслуживание одного пользователя за счёт наших внутренних оптимизаций уходит примерно 200-250 токенов, однако этого все равно может не хватить. Можно зарегестрировать несколько приложений (вроде как это не противоречит правилам Google), однако автоматического способа это делать у нас нет. После верификации приложения квота значительно увеличивается. К тому же, можно запросить бесплатное повышение квоты, подробно описав свою задачу и планы на использование в заявке. <br><br>

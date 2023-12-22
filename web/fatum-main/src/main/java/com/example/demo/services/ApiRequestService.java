@@ -4,28 +4,24 @@ import com.example.demo.entitys.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.minidev.json.JSONObject;
-import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Service
+@Service("apiRequestService")
 public class ApiRequestService {
-    @Value("${fatum.api.url}")
+    @Value("${spring.fatum.api.url}")
     String url;
 
     private RestTemplate restTemplate;
@@ -38,50 +34,57 @@ public class ApiRequestService {
         objectMapper = new ObjectMapper();
     }
 
+    public Predict sendNullRequest(){
+
+        return new Predict();
+    }
+
     public Predict sendTestRequest() throws JsonProcessingException {
         List<String> topProfessions = new ArrayList<>();
         List<Double> tmp0 = new ArrayList<>();
-        topProfessions.add("Гейм-дизайнер");
-        topProfessions.add("Астроном");
-        topProfessions.add("Кинооператор");
-        tmp0.add(0.043177417315906574);
-        tmp0.add(0.02185113924098826);
-        tmp0.add(0.01634701364854289);
+        topProfessions.add("Бизнес-аналитик");
+        topProfessions.add("Маркетолог");
+        topProfessions.add("Менеджер по продажам");
+
+        tmp0.add(0.43177417315906574);
+        tmp0.add(0.3685113924098826);
+        tmp0.add(0.1234701364854289);
 
         YtLike video;
         List<YtLike> ytImpactfulLikes = new ArrayList<>();
-        video = new YtLike("[RU/ENG] Siberian Game Jam - Itch.io Day #55", "bMLTdSgW7ew");
+        video = new YtLike("✅ Что такое ERP-система? Система управления предприятием", "G2Hbi9FtDxw");
         ytImpactfulLikes.add(video);
-        video = new YtLike("The Last Night Gameplay Footage from E3 2017 PC Gaming show", "6GsZG1t3v-Y");
+        video = new YtLike("10 ошибок руководителя / Менеджмент и управление персоналом", "y_XA-JXCxx4");
         ytImpactfulLikes.add(video);
-        video = new YtLike("SIREN. Великий хоррор, прошедший незаметно [Страшно, вырубай!]", "w29y5cXjkH4");
+        video = new YtLike("Оргсхема в современном бизнесе. Основы организационной структуры предприятия простыми словами", "e0c15ypw-Rg");
         ytImpactfulLikes.add(video);
-        video = new YtLike("КУОК – CORRIDA (Music Video)", "HablFXGUZq4");
+        video = new YtLike("А.М.Рощин. Курс \"Основы менеджмента\". Первая лекция", "ixKCwQan810");
         ytImpactfulLikes.add(video);
 
         YtChannel channel;
         List<YtChannel> ytImpactfulChannels = new ArrayList<>();
-        channel = new YtChannel("Meeponegeroi", "UCvbHR1AuYOnJTAO2SJGVDgA");
+        channel = new YtChannel("ITViar", "UC79Qh_C7hOgd_cYJOL82DWw");
         ytImpactfulChannels.add(channel);
-        channel = new YtChannel("БУЛДЖАТь", "UCOxQWb-OuyCSZadzWqrKTCQ");
+        channel = new YtChannel("амоБлог", "UC03-38aILdlkFAAc8lE6MQg");
         ytImpactfulChannels.add(channel);
-        channel = new YtChannel("Obsidian Time", "UCNV-mYw3hlPc9D6EmaStw2w");
+        channel = new YtChannel("ЮЛИЯ ТРУС ПРО БИЗНЕС", "UCgVJE-ez4bCEj8ILrM7g5sQ");
         ytImpactfulChannels.add(channel);
-        channel = new YtChannel("Utopia Show", "UC8M5YVWQan_3Elm-URehz9w");
+        channel = new YtChannel("СНИТКО", "UC-t7InyZm_DrmQZtnBMa00g");
         ytImpactfulChannels.add(channel);
 
         VkImpactfulGroup group;
         List<VkImpactfulGroup> vkImpactfulGroups = new ArrayList<>();
-        group = new VkImpactfulGroup("!internet!", "108531402");
+        group = new VkImpactfulGroup("Бизнес-школа МФТИ", "204334252");
         vkImpactfulGroups.add(group);
-        group = new VkImpactfulGroup("kind of death", "206434816");
+        group = new VkImpactfulGroup("Максим Чирков | Бизнес Блог", "87335115");
         vkImpactfulGroups.add(group);
-        group = new VkImpactfulGroup("DTF", "22781583");
+        group = new VkImpactfulGroup("ЭКВИУМ | Бизнес-сообщество", "211200230");
         vkImpactfulGroups.add(group);
 
 
         List<Integer> topProbabilities = new ArrayList<>();
         List<String> colors = new ArrayList<>();
+        String profession = "";
 
         Predict predict = new Predict();
 
@@ -100,7 +103,7 @@ public class ApiRequestService {
                     index = i;
                 }
             }
-            predict.setProfession(topProfessions.get(index));
+            profession = topProfessions.get(index);
         }
 
         predict.setTopProbabilities(topProbabilities);
@@ -109,6 +112,10 @@ public class ApiRequestService {
         predict.setYtImpactfulLikes(ytImpactfulLikes);
         predict.setYtImpactfulChannels(ytImpactfulChannels);
         predict.setVkImpactfulGroups(vkImpactfulGroups);
+        predict.setProfession(profession);
+
+        if( !(profession.isEmpty() || profession.isBlank()) )
+            predict.setIsValid(true);
 
         return predict;
     }
@@ -140,13 +147,16 @@ public class ApiRequestService {
         List<YtChannel> ytImpactfulChannels = new ArrayList<>();
         List<Integer> topProbabilities = new ArrayList<>();
         List<String> colors = new ArrayList<>();
+        String profession = "";
 
-        for(int i = 0; i < preYtImpactfulLikes.size(); ++i){
-            ytImpactfulLikes.add(new YtLike(preYtImpactfulLikes.get(i).get("name"), preYtImpactfulLikes.get(i).get("id")));
-        }
-        for(int i = 0; i < preYtImpactfulChannels.size(); ++i){
-            ytImpactfulChannels.add(new YtChannel(preYtImpactfulChannels.get(i).get("name"), preYtImpactfulChannels.get(i).get("id")));
-        }
+        if(preYtImpactfulLikes != null)
+            for(int i = 0; i < preYtImpactfulLikes.size(); ++i){
+                ytImpactfulLikes.add(new YtLike(preYtImpactfulLikes.get(i).get("name"), preYtImpactfulLikes.get(i).get("id")));
+            }
+        if(preYtImpactfulChannels != null)
+            for(int i = 0; i < preYtImpactfulChannels.size(); ++i){
+                ytImpactfulChannels.add(new YtChannel(preYtImpactfulChannels.get(i).get("name"), preYtImpactfulChannels.get(i).get("id")));
+            }
 
         System.out.println(root);
         System.out.println(ytImpactfulLikes);
@@ -167,7 +177,7 @@ public class ApiRequestService {
                     index = i;
                 }
             }
-            predict.setProfession(topProfessions.get(index));
+            profession = topProfessions.get(index);
         }
 
         predict.setColors(colors);
@@ -175,6 +185,10 @@ public class ApiRequestService {
         predict.setYtImpactfulLikes(ytImpactfulLikes);
         predict.setTopProfessions(topProfessions);
         predict.setTopProbabilities(topProbabilities);
+        predict.setProfession(profession);
+
+        if( !(profession.isEmpty() || profession.isBlank()) )
+            predict.setIsValid(true);
 
         return predict;
     }

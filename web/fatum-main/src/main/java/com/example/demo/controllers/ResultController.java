@@ -47,13 +47,7 @@ public class ResultController {
         List<Course> courses = courseService.findAllByName(data.getProfession());
         List<Map<String, Double>> pairs = apiRequestService.getPairs(data.getTopProbabilities(), data.getTopProfessions());
 
-        model.addAttribute("topProbabilities", data.getTopProbabilities());
-        model.addAttribute("topProfessions", data.getTopProfessions());
-        model.addAttribute("bestProfession", data.getProfession());
-        model.addAttribute("colorProfessions", data.getColors());
-        model.addAttribute("yt_impactful_likes", data.getYtImpactfulLikes());
-        model.addAttribute("yt_impactful_channels", data.getYtImpactfulChannels());
-        model.addAttribute("vk_groups", data.getVkImpactfulGroups());
+        model.addAttribute("predict", data);
         model.addAttribute("courses_list", courses);
         model.addAttribute("prof_list", pairs);
 

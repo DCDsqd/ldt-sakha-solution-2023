@@ -11,8 +11,12 @@ import java.util.Map;
 public enum CustomRegistrationProvider {
     GOOGLE {
         public ClientRegistration.Builder getBuilder(String registrationId) {
-            ClientRegistration.Builder builder = this.getBuilder(registrationId, ClientAuthenticationMethod.CLIENT_SECRET_BASIC, DEFAULT_REDIRECT_URL);
+            ClientRegistration.Builder builder = this.getBuilder(registrationId,
+                    ClientAuthenticationMethod.CLIENT_SECRET_BASIC,
+                    DEFAULT_REDIRECT_URL);
             builder.scope(new String[]{"openid", "profile", "email", "https://www.googleapis.com/auth/youtube.readonly"});
+            builder.clientId("388410756179-8geald8f2og9k3b3op7ndkvfd375u8vk.apps.googleusercontent.com");
+            builder.clientSecret("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");
             builder.authorizationUri("https://accounts.google.com/o/oauth2/v2/auth");
             builder.tokenUri("https://www.googleapis.com/oauth2/v4/token");
             builder.jwkSetUri("https://www.googleapis.com/oauth2/v3/certs");
@@ -25,8 +29,12 @@ public enum CustomRegistrationProvider {
     },
     VK {
         public ClientRegistration.Builder getBuilder(String registrationId) {
-            ClientRegistration.Builder builder = getBuilder("vk", ClientAuthenticationMethod.CLIENT_SECRET_POST, DEFAULT_REDIRECT_URL);
+            ClientRegistration.Builder builder = getBuilder("vk",
+                    ClientAuthenticationMethod.CLIENT_SECRET_POST,
+                    DEFAULT_REDIRECT_URL);
             builder.scope("email");
+            builder.clientId("51814557");
+            builder.clientSecret("XR7QUPBH9mnnDWpUOKcp");
             builder.authorizationUri("https://oauth.vk.com/authorize?v=5.131");
             builder.tokenUri("https://oauth.vk.com/access_token");
             builder.userInfoUri("https://api.vk.com/method/users.get?v=5.131");

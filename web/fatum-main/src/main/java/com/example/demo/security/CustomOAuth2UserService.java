@@ -1,10 +1,7 @@
 package com.example.demo.security;
 
 
-import com.example.demo.entitys.MyUser;
-import com.example.demo.repositories.UserRepository;
 import com.example.demo.services.MyUserService;
-import org.antlr.v4.runtime.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.convert.converter.Converter;
@@ -26,7 +23,6 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -39,7 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Service
+@Service("customOAuth2UserService")
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private RestOperations restOperations;
     private Converter<OAuth2UserRequest, RequestEntity<?>> requestEntityConverter = new OAuth2UserRequestEntityConverter();

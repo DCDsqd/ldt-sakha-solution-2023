@@ -15,8 +15,11 @@
         </div>
         <div class="col-xs-12 text-center text-primary">
             <h4 class="text-primary">Vk</h4>
+            <#if user.vkLogin()>
             <h6 class="text-secondary">${user.firstName}</h6>
             <h6 class="text-secondary">${user.lastName}</h6>
+            <h6 class="text-secondary">${user.vkId}</h6>
+            </#if>
             <div class="text-center mt-4">
                 <a class="btn btn-xl btn-outline-primary" href="/oauth2/authorization/vk">
                     Сгенерировать токен Vk
@@ -30,8 +33,10 @@
         </div>
         <div class="col-xs-12 text-center text-primary">
             <h4 class="text-primary">Google</h4>
+            <#if user.ytLogin()>
             <h6 class="text-secondary">${user.mail}</h6>
             <h6 class="text-secondary">${user.googleId}</h6>
+            </#if>
             <div class="text-center mt-4">
                 <a class="btn btn-xl btn-outline-primary" href="/oauth2/authorization/google">
                     Сгенерировать токен Google

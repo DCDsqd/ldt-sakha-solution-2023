@@ -30,4 +30,12 @@ public class MyUser {
     public String toString(){
         return (id.toString() + ","+firstName+","+lastName);
     }
+
+    public boolean vkLogin(){
+        return firstName != null && lastName != null && vkId != null;
+    }
+
+    public boolean ytLogin(){
+        return googleId != null && mail != null;
+    }
 }

@@ -1,7 +1,12 @@
 package com.example.demo.controllers;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -19,6 +24,24 @@ public class LoginController {
     Map<String, String> oauth2AuthenticationUrls = new HashMap<>();
 
     public LoginController() {
+    }
+
+    @RequestMapping(value = {"/exit"}, method = RequestMethod.GET)
+    public String fetchSignoutSite(HttpServletRequest request, HttpServletResponse response){
+
+        HttpSession session = request.getSession(false);
+        SecurityContextHolder.clearContext();
+
+        session = request.getSession(false);
+        if(session != null) {
+            session.invalidate();
+        }
+
+        for(Cookie cookie : request.getCookies()) {
+            cookie.setMaxAge(0);
+        }
+
+        return "redirect:/login";
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)

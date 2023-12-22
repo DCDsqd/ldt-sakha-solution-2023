@@ -18,6 +18,7 @@ public class Course {
     private Long id;
 
     private String info;
+    private String name;
     private String professionName;
     private Long professionId;
 }

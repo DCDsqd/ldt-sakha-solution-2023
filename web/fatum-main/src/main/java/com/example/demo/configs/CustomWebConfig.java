@@ -1,12 +1,15 @@
 package com.example.demo.configs;
 
-import com.example.demo.components.SecurityHandler;
 import com.example.demo.security.*;
-import com.example.demo.services.MyUserService;
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,38 +33,35 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
-@PropertySource("classpath:application.properties")
-public class WebConfig {
-    private static List<String> clients = Arrays.asList("google", "vk");
-    private static String CLIENT_PROPERTY_KEY = "spring.security.oauth2.client.registration.";
+public class CustomWebConfig {
+    private static final List<String> clients = Arrays.asList("google", "vk");
 
     private final Environment env;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final SecurityHandler successHandler;
     private final CustomOidcUserService customOidcUserService;
 
     @Autowired
-    public WebConfig(Environment env,
-                     CustomOAuth2UserService customOAuth2UserService,
-                     SecurityHandler successHandler,
-                     CustomOidcUserService customOidcUserService) {
+    public CustomWebConfig(Environment env,
+                           CustomOAuth2UserService customOAuth2UserService,
+                           CustomOidcUserService customOidcUserService) {
         this.env = env;
         this.customOAuth2UserService = customOAuth2UserService;
-        this.successHandler = successHandler;
         this.customOidcUserService = customOidcUserService;
     }
 
     @Bean
+    @Autowired
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .requestMatchers("/login", "/policy",  "/css/**", "/assets/**", "/test")
+                .requestMatchers("/login/**", "/policy",  "/css/**", "/assets/**", "/test")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -70,7 +70,6 @@ public class WebConfig {
                 .loginPage("/login")
                 .and()
                 .oauth2Login()
-                .successHandler(successHandler)
                 .clientRegistrationRepository(clientRegistrationRepository())
                 .authorizedClientService(authorizedClientService())
                 .authorizationEndpoint()
@@ -122,9 +121,16 @@ public class WebConfig {
     }
 
     private ClientRegistration getRegistration(String client) {
+        final String DEFAULT_REDIRECT_URL = "{baseUrl}/{action}/oauth2/code/{registrationId}";
+        String CLIENT_PROPERTY_KEY = "spring.security.oauth2.client.registration.";
         String clientId = env.getProperty(
                 CLIENT_PROPERTY_KEY + client + ".client-id"
         );
+        String redirectUri = env.getProperty(
+                CLIENT_PROPERTY_KEY + client + ".redirect-uri"
+        );
+
+        System.out.println(redirectUri);
 
         if (clientId == null) {
             return null;
@@ -134,16 +140,23 @@ public class WebConfig {
                 CLIENT_PROPERTY_KEY + client + ".client-secret"
         );
 
-
         if (client.equals("google")) {
             return CustomRegistrationProvider.GOOGLE.getBuilder(client)
-                    .clientId(clientId).clientSecret(clientSecret).build();
+                    .clientId(clientId)
+                    .clientSecret(clientSecret)
+                    .redirectUri((redirectUri != null)? redirectUri : DEFAULT_REDIRECT_URL)
+                    .build();
         }if (client.equals("vk")) {
             return CustomRegistrationProvider.VK.getBuilder(client)
-                    .clientId(clientId).clientSecret(clientSecret).build();
+                    .clientId(clientId)
+                    .clientSecret(clientSecret)
+                    .redirectUri((redirectUri != null)? redirectUri : DEFAULT_REDIRECT_URL)
+                    .build();
         }
+
         return null;
     }
+
 
     // TOKEN SERVICES
     @Bean
@@ -163,6 +176,4 @@ public class WebConfig {
         accessTokenResponseClient.setRestOperations(restTemplate);
         return accessTokenResponseClient;
     }
-
-
 }

@@ -21,4 +21,5 @@ public class Predict implements Serializable {
     List<YtChannel> ytImpactfulChannels = new ArrayList<>();
     List<Map<String, String>> vkImpactfulLikes = new ArrayList<>();
     List<VkImpactfulGroup> vkImpactfulGroups = new ArrayList<>();
+    private Boolean isValid = false;
 }

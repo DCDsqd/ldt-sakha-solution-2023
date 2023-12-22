@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Objects;
 
-@Service
+@Service("myUserService")
 public class MyUserService {
     private UserRepository userRepository;
 

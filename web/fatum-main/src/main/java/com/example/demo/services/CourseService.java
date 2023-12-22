@@ -7,9 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-@Service
+@Service("courseService")
 public class CourseService {
     private final MyCourseRepository courseRepository;
 
@@ -173,7 +174,19 @@ public class CourseService {
     private void fillIntoProfession(String name, List<String> list){
         for(int i = 0; i < list.size(); ++i){
             Course course = new Course();
+            String tmp = list.get(i);
+            String[] tmp1 = tmp.split(" - ");
+            String cname = tmp;
+            String cinfo = "ссылка";
+            System.out.println(tmp1.length);
+            if(tmp1.length > 1){
+                cname = tmp1[0];
+                cinfo = tmp1[1];
+            }
+
             course.setProfessionName(name);
+            course.setName(cname);
+            course.setInfo(cinfo);
             course.setInfo(list.get(i));
 
             courseRepository.save(course);

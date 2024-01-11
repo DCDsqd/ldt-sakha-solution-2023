@@ -66,9 +66,6 @@ if __name__ == "__main__":
                                             ".googleusercontent.com.json")
 
     for name, keywords in professions:
-        if name != "Реставратор":
-            continue
-
         if not keywords:
             print("No keywords, terminating")
             exit(0)
